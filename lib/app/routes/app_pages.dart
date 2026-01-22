@@ -6,6 +6,9 @@ class AppPages {
     GetPage(name: AppRoutes.splashScreen, page: () => SplashScreen()),
     GetPage(name: AppRoutes.homeScreen, page: () => HomeScreen()),
     GetPage(name: AppRoutes.detailsScreen, page: () => DetailsScreen()),
-    GetPage(name: AppRoutes.segmentDetailsScreen, page: () => SegmentDetailsScreen()),
+    GetPage(
+      name: AppRoutes.segmentDetailsScreen,
+      page: () => SegmentDetailsScreen(),
+    ),
   ];
 }

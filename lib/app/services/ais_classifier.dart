@@ -5,7 +5,7 @@ class AISClassifier {
   static VesselStatus classify(AISPoint point) {
     if (point.speed >= 6) {
       return VesselStatus.atSea;
-    }else {
+    } else {
       return VesselStatus.inPort;
     }
 
@@ -29,4 +29,3 @@ class AISClassifier {
     return points.map((point) => classify(point)).toList();
   }
 }
-

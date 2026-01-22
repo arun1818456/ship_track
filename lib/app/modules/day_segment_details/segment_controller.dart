@@ -1,8 +1,7 @@
-
 import '../../../exports.dart';
 import '../../models/historical_model.dart';
 
-class SegmentController extends GetxController with BaseClass{
+class SegmentController extends GetxController with BaseClass {
   HistoricalModelData historicalModelData = HistoricalModelData();
 
   late DateTime selectedDate;
@@ -46,5 +45,4 @@ class SegmentController extends GetxController with BaseClass{
           positionDate.day == selectedDate.day;
     }).toList();
   }
-
 }

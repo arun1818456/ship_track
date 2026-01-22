@@ -9,16 +9,19 @@ mixin BaseClass {
   String formatDate(DateTime date) {
     return dateFormatter.format(date);
   }
+
   keyBoardOff(context) {
     FocusScopeNode currentFocus = FocusScope.of(context);
     if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
       FocusManager.instance.primaryFocus!.unfocus();
     }
   }
-  void showMyAlertDialog(
-      {String title = "Alert",
-        required String message,
-        VoidCallback? onOkTap}) {
+
+  void showMyAlertDialog({
+    String title = "Alert",
+    required String message,
+    VoidCallback? onOkTap,
+  }) {
     Get.dialog(
       AlertDialog(
         backgroundColor: Colors.white,
@@ -33,10 +36,7 @@ mixin BaseClass {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         content: Text(
           message,
@@ -86,9 +86,10 @@ mixin BaseClass {
       ),
     );
   }
+
   String formatUtcToLocal(String utcDateTime) {
     final DateTime utc = DateTime.parse(utcDateTime); // parses as UTC
-    final DateTime local = utc.toLocal();             // convert to device time
+    final DateTime local = utc.toLocal(); // convert to device time
 
     return "${local.day.toString().padLeft(2, '0')}-"
         "${local.month.toString().padLeft(2, '0')}-"
@@ -96,5 +97,4 @@ mixin BaseClass {
         "${local.hour.toString().padLeft(2, '0')}:"
         "${local.minute.toString().padLeft(2, '0')}";
   }
-
 }

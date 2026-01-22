@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import '../../../exports.dart';
 import '../../constant/vessel_data.dart';
 

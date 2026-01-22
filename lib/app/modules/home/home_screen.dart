@@ -38,7 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 15),
                 TextFormField(
                   controller: TextEditingController(
-                    text: "${controller.selectedVessel?["name"]} , IMO:${controller.selectedVessel?["IMO"]}",
+                    text:
+                        "${controller.selectedVessel?["name"]} , IMO:${controller.selectedVessel?["IMO"]}",
                   ),
                   readOnly: true,
                   decoration: InputDecoration(
@@ -104,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 const SizedBox(height: 20),
+
                 /// Recent Searches
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

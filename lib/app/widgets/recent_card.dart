@@ -5,6 +5,7 @@ class RecentCard extends StatelessWidget {
   final String signOnDate;
   final String signOffDate;
   final GestureTapCallback onTap;
+
   const RecentCard({
     super.key,
     required this.shipName,
@@ -32,7 +33,10 @@ class RecentCard extends StatelessWidget {
               /// 🚢 Header – Ship Name
               Row(
                 children: [
-                  const Icon(Icons.directions_boat_filled, color: AppColor.appColor),
+                  const Icon(
+                    Icons.directions_boat_filled,
+                    color: AppColor.appColor,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

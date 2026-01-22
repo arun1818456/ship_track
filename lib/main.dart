@@ -11,6 +11,7 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget with BaseClass {
   MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget with BaseClass {
     );
   }
 }
-printWrapped(text){
+
+printWrapped(text) {
   JsonEncoder.withIndent('  ').convert(text);
 }

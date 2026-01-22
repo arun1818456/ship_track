@@ -26,6 +26,7 @@ class Data {
   String? name;
   String? mmsi;
   String? imo;
+
   // Null? eni;
   String? countryIso;
   String? type;
@@ -102,8 +103,8 @@ class Positions {
   Positions.fromJson(Map<String, dynamic> json) {
     lat = json['lat'];
     lon = json['lon'];
-    speed = double.parse((json['speed']??0.0).toString());
-    course = double.parse((json['course']??0.0).toString());
+    speed = double.parse((json['speed'] ?? 0.0).toString());
+    course = double.parse((json['course'] ?? 0.0).toString());
     heading = json['heading'];
     destination = json['destination'];
     lastPositionEpoch = json['last_position_epoch'];

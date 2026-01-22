@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
+
 import '../../../exports.dart';
 
 class DetailsController extends GetxController with BaseClass {
@@ -37,7 +38,7 @@ class DetailsController extends GetxController with BaseClass {
       isLoading = true;
       update();
 
-      String apiKey = dotenv.env['APIKEY']??"";
+      String apiKey = dotenv.env['APIKEY'] ?? "";
       final response = await httpRequest(
         REQUEST.get,
         "$getHistoryByDate$apiKey&imo=${selectedVessel?["IMO"]}"
@@ -73,6 +74,7 @@ class DetailsController extends GetxController with BaseClass {
       print("Historical Error: $e");
     }
   }
+
   void scrollToTop() {
     scrollController.animateTo(
       0,

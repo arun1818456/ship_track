@@ -20,9 +20,6 @@ class AISPoint {
     );
   }
 }
-/// Vessel status classification
-enum VesselStatus {
-  atSea,
-  inPort,
-}
 
+/// Vessel status classification
+enum VesselStatus { atSea, inPort }

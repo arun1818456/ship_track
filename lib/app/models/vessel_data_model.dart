@@ -27,6 +27,7 @@ class Data {
   String? nameAis;
   String? mmsi;
   String? imo;
+
   // Null? eni;
   String? countryIso;
   String? countryName;
@@ -47,31 +48,32 @@ class Data {
   bool? isNavaid;
   String? homePort;
 
-  Data(
-      {this.uuid,
-        this.name,
-        this.nameAis,
-        this.mmsi,
-        this.imo,
-        // this.eni,
-        this.countryIso,
-        this.countryName,
-        this.callsign,
-        this.type,
-        this.typeSpecific,
-        this.grossTonnage,
-        this.deadweight,
-        this.teu,
-        this.liquidGas,
-        this.length,
-        this.breadth,
-        this.draughtAvg,
-        this.draughtMax,
-        this.speedAvg,
-        this.speedMax,
-        this.yearBuilt,
-        this.isNavaid,
-        this.homePort});
+  Data({
+    this.uuid,
+    this.name,
+    this.nameAis,
+    this.mmsi,
+    this.imo,
+    // this.eni,
+    this.countryIso,
+    this.countryName,
+    this.callsign,
+    this.type,
+    this.typeSpecific,
+    this.grossTonnage,
+    this.deadweight,
+    this.teu,
+    this.liquidGas,
+    this.length,
+    this.breadth,
+    this.draughtAvg,
+    this.draughtMax,
+    this.speedAvg,
+    this.speedMax,
+    this.yearBuilt,
+    this.isNavaid,
+    this.homePort,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];

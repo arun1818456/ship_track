@@ -1,5 +1,6 @@
 import 'package:ship_track_flutter/app/modules/day_segment_details/segment_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../exports.dart';
 
 class SegmentDetailsScreen extends StatelessWidget {

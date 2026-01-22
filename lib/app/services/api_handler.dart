@@ -1,11 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:ship_track_flutter/app/services/app_exception.dart';
 
 import '../../exports.dart';
-import '../constant/api_constants.dart';
 
 enum REQUEST { get, post, put, patch, delete }
 
@@ -117,7 +117,9 @@ Future<dynamic> httpRequest(
     if (kDebugMode) {
       final decoded = safeDecode(value.body);
       final prettyString = const JsonEncoder.withIndent('  ').convert(decoded);
-      log("Code ${value.statusCode}Url 👉 ${getUrl(url)} \n Response 👉 $prettyString");
+      log(
+        "Code ${value.statusCode}Url 👉 ${getUrl(url)} \n Response 👉 $prettyString",
+      );
     }
     if (value.statusCode == 401 &&
         jsonDecode(value.body)["message"].toString() == "Please authenticate") {
