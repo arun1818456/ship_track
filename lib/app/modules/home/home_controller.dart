@@ -87,9 +87,9 @@ class HomeController extends GetxController with BaseClass {
       return;
     }
 
-    // impliment here if selected date is more then 1 month show error
-    if (isMoreThanOneMonth(signOnDate!, signOffDate!)) {
-      showMyAlertDialog(message: "Date should not be more than one month");
+    // impliment here if selected date is more then 6 month show error
+    if (isMoreThanSixMonth(signOnDate!, signOffDate!)) {
+      showMyAlertDialog(message: "Date should not be more than Six month");
       return;
     }
 
@@ -132,10 +132,10 @@ class HomeController extends GetxController with BaseClass {
     update();
   }
 
-  bool isMoreThanOneMonth(DateTime start, DateTime end) {
+  bool isMoreThanSixMonth(DateTime start, DateTime end) {
     final DateTime oneMonthLater = DateTime(
       start.year,
-      start.month + 1,
+      start.month + 6,
       start.day,
     );
     return end.isAfter(oneMonthLater);

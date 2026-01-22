@@ -1,9 +1,9 @@
-import '../models/ais_point_model.dart';
+import 'package:ship_track_flutter/app/models/historical_model.dart';
 
 /// Classification logic for AT_SEA / IN_PORT
 class AISClassifier {
-  static VesselStatus classify(AISPoint point) {
-    if (point.speed >= 6) {
+  static VesselStatus classify(Positions point) {
+    if ((point.speed??0) >= 2) {
       return VesselStatus.atSea;
     } else {
       return VesselStatus.inPort;
@@ -25,7 +25,7 @@ class AISClassifier {
   }
 
   /// Classify a list of AIS points
-  static List<VesselStatus> classifyAll(List<AISPoint> points) {
+  static List<VesselStatus> classifyAll(List<Positions> points) {
     return points.map((point) => classify(point)).toList();
   }
 }

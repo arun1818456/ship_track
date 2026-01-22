@@ -1,17 +1,16 @@
 import 'package:ship_track_flutter/app/models/calendarday_model.dart';
 import 'package:ship_track_flutter/app/models/day_segment_model.dart';
-
-import '../models/ais_point_model.dart';
+import 'package:ship_track_flutter/app/models/historical_model.dart';
 import '../services/ais_classifier.dart';
 
 /// Calculate calendar days from AIS data
 class CalendarDayCalculator {
   static CalendarDayResult calculateDays({
-    required List<AISPoint> points,
+    required List<Positions> points,
     DateTime? signOnDate,
     DateTime? signOffDate,
   }) {
-    if (points.isEmpty) {
+    if (points.isEmpty && signOnDate == null && signOffDate == null) {
       return CalendarDayResult(
         totalCalendarDays: 0,
         totalAtSeaDays: 0,
@@ -20,57 +19,72 @@ class CalendarDayCalculator {
       );
     }
 
-    // Sort points by timestamp
-    final sortedPoints = List<AISPoint>.from(points)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    // Sort points
+    final sortedPoints = List<Positions>.from(points)
+      ..sort((a, b) =>
+          a.lastPositionUTC!.compareTo(b.lastPositionUTC!));
 
-    final firstTimestamp = sortedPoints.first.timestamp;
-    final lastTimestamp = sortedPoints.last.timestamp;
+    final firstTimestamp = sortedPoints.isNotEmpty
+        ? sortedPoints.first.lastPositionUTC
+        : signOnDate;
 
-    // Use provided dates or default to first/last timestamp
-    final effectiveSignOn = signOnDate ?? firstTimestamp;
-    final effectiveSignOff = signOffDate ?? lastTimestamp;
+    final lastTimestamp = sortedPoints.isNotEmpty
+        ? sortedPoints.last.lastPositionUTC
+        : signOffDate;
 
-    // Calculate total calendar days (inclusive)
+    final effectiveSignOn = signOnDate ?? firstTimestamp!;
+    final effectiveSignOff = signOffDate ?? lastTimestamp!;
+
     final totalCalendarDays =
         effectiveSignOff.difference(effectiveSignOn).inDays + 1;
 
-    // Group points by calendar day
-    final Map<DateTime, List<AISPoint>> pointsByDay = {};
+    // -------------------------------
+    // 🔹 Group AIS points by day
+    // -------------------------------
+    final Map<DateTime, List<Positions>> pointsByDay = {};
+
     for (final point in sortedPoints) {
-      // Only consider points within sign-on/sign-off range
-      if (point.timestamp.isBefore(effectiveSignOn) ||
-          point.timestamp.isAfter(effectiveSignOff)) {
+      if (point.lastPositionUTC!.isBefore(effectiveSignOn) ||
+          point.lastPositionUTC!.isAfter(effectiveSignOff)) {
         continue;
       }
 
       final day = DateTime(
-        point.timestamp.year,
-        point.timestamp.month,
-        point.timestamp.day,
+        point.lastPositionUTC!.year,
+        point.lastPositionUTC!.month,
+        point.lastPositionUTC!.day,
       );
 
       pointsByDay.putIfAbsent(day, () => []).add(point);
     }
 
-    // Classify each day
+    // -------------------------------
+    // 🔹 Iterate ALL calendar days
+    // -------------------------------
     int atSeaDays = 0;
     int inPortDays = 0;
     final List<DaySegment> segments = [];
 
-    for (final entry in pointsByDay.entries) {
-      final day = entry.key;
-      final dayPoints = entry.value;
+    for (int i = 0; i < totalCalendarDays; i++) {
+      final day = DateTime(
+        effectiveSignOn.year,
+        effectiveSignOn.month,
+        effectiveSignOn.day + i,
+      );
 
-      // Classify all points for this day
-      final classifications = dayPoints
-          .map((p) => AISClassifier.classify(p))
-          .toList();
+      final dayPoints = pointsByDay[day] ?? [];
 
-      // Day is AT_SEA if at least one point is AT_SEA
-      final hasAtSea = classifications.contains(VesselStatus.atSea);
+      bool isAtSea = false;
 
-      if (hasAtSea) {
+      if (dayPoints.isNotEmpty) {
+        final classifications = dayPoints
+            .map((p) => AISClassifier.classify(p))
+            .toList();
+
+        isAtSea = classifications.contains(VesselStatus.atSea);
+      }
+
+      if (isAtSea) {
         atSeaDays++;
       } else {
         inPortDays++;
@@ -79,14 +93,13 @@ class CalendarDayCalculator {
       segments.add(
         DaySegment(
           date: day,
-          status: hasAtSea ? VesselStatus.atSea : VesselStatus.inPort,
-          pointCount: dayPoints.length,
+          status: isAtSea
+              ? VesselStatus.atSea
+              : VesselStatus.inPort, // default when no data
+          pointCount: dayPoints.length, // 👈 0 if missing
         ),
       );
     }
-
-    // Sort segments by date
-    segments.sort((a, b) => a.date.compareTo(b.date));
 
     return CalendarDayResult(
       totalCalendarDays: totalCalendarDays,

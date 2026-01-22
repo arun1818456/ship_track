@@ -2,7 +2,7 @@ import '../../../exports.dart';
 import '../../models/historical_model.dart';
 
 class SegmentController extends GetxController with BaseClass {
-  HistoricalModelData historicalModelData = HistoricalModelData();
+ List<Positions> aisPoints = [];
 
   late DateTime selectedDate;
 
@@ -15,26 +15,23 @@ class SegmentController extends GetxController with BaseClass {
 
     var args = Get.arguments;
 
-    historicalModelData = args['data'];
+    aisPoints = args['data'];
     selectedDate = args['date'];
 
     _filterPositionsByDate();
   }
 
   void _filterPositionsByDate() {
-    final positions = historicalModelData.data?.positions ?? [];
 
-    filteredPositions = positions.where((pos) {
+    filteredPositions = aisPoints.where((pos) {
       final utcString = pos.lastPositionUTC;
-      if (utcString == null || utcString.isEmpty) return false;
+      if (utcString == null ) return false;
 
       DateTime? positionDate;
 
       try {
         positionDate = DateTime.parse(
-          utcString.contains('T')
-              ? utcString
-              : utcString.replaceFirst(' ', 'T'),
+          utcString.toString(),
         ).toUtc();
       } catch (e) {
         return false;

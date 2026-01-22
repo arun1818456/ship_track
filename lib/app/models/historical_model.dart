@@ -87,7 +87,7 @@ class Positions {
   int? heading;
   String? destination;
   int? lastPositionEpoch;
-  String? lastPositionUTC;
+  DateTime? lastPositionUTC;
 
   Positions({
     this.lat,
@@ -101,14 +101,14 @@ class Positions {
   });
 
   Positions.fromJson(Map<String, dynamic> json) {
-    lat = json['lat'];
-    lon = json['lon'];
+    lat = (json['lat'] ?? 0).toDouble();
+    lon = (json['lon'] ?? 0).toDouble();
     speed = double.parse((json['speed'] ?? 0.0).toString());
     course = double.parse((json['course'] ?? 0.0).toString());
     heading = json['heading'];
     destination = json['destination'];
     lastPositionEpoch = json['last_position_epoch'];
-    lastPositionUTC = json['last_position_UTC'];
+    lastPositionUTC = DateTime.parse(json['last_position_UTC'].toString());
   }
 
   Map<String, dynamic> toJson() {
@@ -146,3 +146,6 @@ class Meta {
     return data;
   }
 }
+
+/// Vessel status classification
+enum VesselStatus { atSea, inPort }

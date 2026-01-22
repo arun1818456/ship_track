@@ -1,4 +1,5 @@
-import 'package:ship_track_flutter/app/models/ais_point_model.dart';
+
+import 'historical_model.dart';
 
 class DaySegment {
   final DateTime date;

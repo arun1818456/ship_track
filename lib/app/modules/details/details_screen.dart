@@ -1,3 +1,4 @@
+import 'package:ship_track_flutter/app/models/historical_model.dart';
 import 'package:ship_track_flutter/app/modules/details/details_screen_controller.dart';
 
 import '../../../exports.dart';
@@ -191,8 +192,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
       if (controller.signOnDate == null || controller.signOffDate == null) {
         return true;
       }
-      return !point.timestamp.isBefore(controller.signOnDate!) &&
-          !point.timestamp.isAfter(controller.signOffDate!);
+      return !point.lastPositionUTC!.isBefore(controller.signOnDate!) &&
+          !point.lastPositionUTC!.isAfter(controller.signOffDate!);
     }).toList();
 
     return Card(
@@ -317,7 +318,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         AppRoutes.segmentDetailsScreen,
                         arguments: {
                           "date": segment.date,
-                          "data": controller?.historicalModelData,
+                          "data": controller.aisPoints,
                         },
                       );
                     },
@@ -404,7 +405,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "${_filterPositionsByDate(segment.date, controller)} AIS",
+                                  "${_filterPositionsByDate(segment.date, controller!)} AIS",
                                   // '${segment.pointCount} AIS',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -481,19 +482,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  String _filterPositionsByDate(date, controller) {
-    final positions = controller.historicalModelData.data?.positions ?? [];
+  String _filterPositionsByDate(date,DetailsController controller) {
+    final positions = controller.aisPoints?? [];
 
     var filteredPositions = positions.where((pos) {
       final utcString = pos.lastPositionUTC;
-      if (utcString == null || utcString.isEmpty) return false;
+      if (utcString == null ) return false;
       DateTime? positionDate;
 
       try {
-        positionDate = DateTime.parse(
-          utcString.contains('T')
-              ? utcString
-              : utcString.replaceFirst(' ', 'T'),
+        positionDate = DateTime.parse(utcString.toString(),
         ).toUtc();
       } catch (e) {
         return false;

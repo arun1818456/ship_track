@@ -119,8 +119,7 @@ class SegmentDetailsScreen extends StatelessWidget {
                             _infoText(
                               'UTC Time',
                               formatTimeFromIso(
-                                pos.lastPositionUTC ??
-                                    DateTime.now().toIso8601String(),
+                                (pos.lastPositionUTC ?? DateTime.now().toIso8601String()).toString(),
                               ),
                             ),
                           ],
