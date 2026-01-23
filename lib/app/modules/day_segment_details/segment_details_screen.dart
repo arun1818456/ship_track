@@ -122,6 +122,13 @@ class SegmentDetailsScreen extends StatelessWidget {
                                 (pos.lastPositionUTC ?? DateTime.now().toIso8601String()).toString(),
                               ),
                             ),
+                            const SizedBox(height: 6),
+                            _infoText(
+                              'Reason Code',
+                             controller.getReasonCodeByIndex(index).name.toString(),
+                              background: true
+                            ),
+
                           ],
                         ),
                       ),
@@ -143,21 +150,28 @@ class SegmentDetailsScreen extends StatelessWidget {
     return "$year-$month-$day $hour :$minute";
   }
 
-  Widget _infoText(String title, String value) {
-    return RichText(
-      text: TextSpan(
-        text: '$title: ',
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Colors.black,
-          fontSize: 12,
-        ),
-        children: [
-          TextSpan(
-            text: value,
-            style: const TextStyle(fontWeight: FontWeight.normal),
+  Widget _infoText(String title, String value, {bool background=false}) {
+    return Container(
+      padding: background ? const EdgeInsets.all(8):null,
+      decoration: BoxDecoration(
+        color: background ? Colors.green[50] : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: RichText(
+        text: TextSpan(
+          text: '$title: ',
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            fontSize: 12,
           ),
-        ],
+          children: [
+            TextSpan(
+              text: value,
+              style: const TextStyle(fontWeight: FontWeight.normal),
+            ),
+          ],
+        ),
       ),
     );
   }

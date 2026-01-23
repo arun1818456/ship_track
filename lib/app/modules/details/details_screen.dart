@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ship_track_flutter/app/models/historical_model.dart';
 import 'package:ship_track_flutter/app/modules/details/details_screen_controller.dart';
 
@@ -254,7 +256,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Widget _buildSegmentsCard(context, {DetailsController? controller}) {
+  Widget _buildSegmentsCard(context, {required DetailsController controller}) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -291,7 +293,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    '${controller?.result?.segments.length ?? 0} days',
+                    '${controller.result?.segments.length ?? 0} days',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
@@ -302,15 +304,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            if ((controller?.result?.segments.length ?? 0) != 0)
+            if ((controller.result?.segments.length ?? 0) != 0)
               ListView.separated(
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: controller?.result?.segments.length ?? 0,
+                itemCount: controller.result?.segments.length ?? 0,
                 separatorBuilder: (context, index) => const SizedBox(height: 6),
                 itemBuilder: (context, index) {
-                  final segment = controller?.result?.segments[index];
+                  final segment = controller.result?.segments[index];
                   final isAtSea = segment?.status == VesselStatus.atSea;
                   return GestureDetector(
                     onTap: () {
@@ -365,27 +367,54 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 3),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isAtSea
-                                        ? Colors.blue[200]
-                                        : Colors.green[200],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    isAtSea ? 'AT_SEA' : 'IN_PORT',
-                                    style: TextStyle(
-                                      color: isAtSea
-                                          ? Colors.blue[900]
-                                          : Colors.green[900],
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isAtSea
+                                            ? Colors.blue[200]
+                                            : Colors.green[200],
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        isAtSea ? 'AT_SEA' : 'IN_PORT',
+                                        style: TextStyle(
+                                          color: isAtSea
+                                              ? Colors.blue[900]
+                                              : Colors.green[900],
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    SizedBox(width: 5),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isAtSea
+                                            ? Colors.blue[200]
+                                            : Colors.green[200],
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        getReasonCodeForDate(controller.aisPoints,segment.date).name.toString(),
+                                        style: TextStyle(
+                                          color: isAtSea
+                                              ? Colors.blue[900]
+                                              : Colors.green[900],
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -405,8 +434,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "${_filterPositionsByDate(segment.date, controller!)} AIS",
-                                  // '${segment.pointCount} AIS',
+                                  "${_filterPositionsByDate(segment.date, controller)} AIS",
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -482,17 +510,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  String _filterPositionsByDate(date,DetailsController controller) {
-    final positions = controller.aisPoints?? [];
+  String _filterPositionsByDate(date, DetailsController controller) {
+    final positions = controller.aisPoints ;
 
     var filteredPositions = positions.where((pos) {
       final utcString = pos.lastPositionUTC;
-      if (utcString == null ) return false;
+      if (utcString == null) return false;
       DateTime? positionDate;
 
       try {
-        positionDate = DateTime.parse(utcString.toString(),
-        ).toUtc();
+        positionDate = DateTime.parse(utcString.toString()).toUtc();
       } catch (e) {
         return false;
       }
@@ -503,4 +530,83 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }).toList();
     return filteredPositions.length.toString();
   }
+
+  DayReasonCode getReasonCodeForDate(List<Positions> aisPoints, DateTime date) {
+    // 1️⃣ Filter positions by date
+    final dayPoints = aisPoints.where((pos) {
+      final utc = pos.lastPositionUTC;
+      if (utc == null) return false;
+      return utc.year == date.year &&
+          utc.month == date.month &&
+          utc.day == date.day;
+    }).toList();
+
+    // 2️⃣ No data
+    if (dayPoints.isEmpty) return DayReasonCode.NO_DATA;
+
+    // 3️⃣ Insufficient points
+    if (dayPoints.length < 3) return DayReasonCode.INSUFFICIENT_DATA;
+
+    // 4️⃣ Speed calculations
+    double maxSpeed = 0;
+    double totalDistanceKm = 0;
+    bool allZeroSpeed = true;
+    List<int> timeGaps = [];
+
+    for (int i = 0; i < dayPoints.length; i++) {
+      final p = dayPoints[i];
+      final speed = p.speed ?? 0;
+
+      if (speed > maxSpeed) maxSpeed = speed;
+      if (speed > 0) allZeroSpeed = false;
+
+      // Calculate gaps
+      if (i > 0 && p.lastPositionUTC != null && dayPoints[i - 1].lastPositionUTC != null) {
+        final gap = p.lastPositionUTC!.difference(dayPoints[i - 1].lastPositionUTC!).inHours;
+        timeGaps.add(gap);
+      }
+
+      // Calculate distance from previous point
+      if (i > 0 && p.lat != null && p.lon != null && dayPoints[i - 1].lat != null && dayPoints[i - 1].lon != null) {
+        totalDistanceKm += _haversineDistance(
+            dayPoints[i - 1].lat!, dayPoints[i - 1].lon!, p.lat!, p.lon!);
+      }
+    }
+
+    // 5️⃣ Partial data gaps
+    if (timeGaps.any((gap) => gap > 6)) return DayReasonCode.PARTIAL_DATA_GAPS;
+
+    // 6️⃣ Outlier filtered (example: impossible speeds > 60 knots)
+    if (maxSpeed > 60) return DayReasonCode.OUTLIER_FILTERED;
+
+    // 7️⃣ AT SEA logic
+    if (maxSpeed > 2.0) return DayReasonCode.AT_SEA_SPEED_THRESHOLD;
+    if (totalDistanceKm > 10) return DayReasonCode.AT_SEA_DISTANCE_THRESHOLD;
+    if (!allZeroSpeed && maxSpeed <= 2.0) return DayReasonCode.AT_SEA_UNDERWAY_STATUS;
+
+    // 8️⃣ IN PORT logic
+    if (allZeroSpeed && totalDistanceKm < 1) return DayReasonCode.IN_PORT_STATIONARY;
+
+    // 9️⃣ Anchored (example: stationary but not in port)
+    if (allZeroSpeed && totalDistanceKm >= 1) return DayReasonCode.ANCHORED_STATUS;
+
+    // 10️⃣ Mixed / fallback
+    return DayReasonCode.MIXED_BEHAVIOR;
+  }
+
+
 }
+double _haversineDistance(double lat1, double lon1, double lat2, double lon2) {
+  const R = 6371; // Radius of Earth in km
+  final dLat = _deg2rad(lat2 - lat1);
+  final dLon = _deg2rad(lon2 - lon1);
+
+  final a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(_deg2rad(lat1)) * cos(_deg2rad(lat2)) *
+          sin(dLon / 2) * sin(dLon / 2);
+
+  final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  return R * c;
+}
+
+double _deg2rad(double deg) => deg * pi / 180;

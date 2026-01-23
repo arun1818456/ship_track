@@ -48,12 +48,12 @@ class HomeController extends GetxController with BaseClass {
       context: context,
       initialDate: signOnDate ?? DateTime.now(),
       firstDate: DateTime(2019),
-      lastDate: DateTime.now(),
+      lastDate: DateTime.now().subtract(Duration(days: 1)),
     );
 
     if (picked != null) {
       signOnDate = _normalizeDate(picked);
-      signOffDate = _normalizeDate(picked.add(Duration(days: 30)));
+      // signOffDate = _normalizeDate(picked.add(Duration(days: 30)));
 
       // Auto adjust sign-off if invalid
       if (signOffDate != null && signOffDate!.isBefore(signOnDate!)) {
@@ -70,7 +70,7 @@ class HomeController extends GetxController with BaseClass {
       context: context,
       initialDate: signOffDate ?? DateTime.now().subtract(Duration(days: 1)),
       firstDate: signOnDate ?? DateTime(2019),
-      lastDate: DateTime.now(),
+      lastDate: DateTime.now().subtract(Duration(days: 1)),
     );
 
     if (picked != null) {

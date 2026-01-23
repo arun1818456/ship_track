@@ -2,7 +2,7 @@ import '../../../exports.dart';
 import '../../models/historical_model.dart';
 
 class SegmentController extends GetxController with BaseClass {
- List<Positions> aisPoints = [];
+  List<Positions> aisPoints = [];
 
   late DateTime selectedDate;
 
@@ -22,17 +22,14 @@ class SegmentController extends GetxController with BaseClass {
   }
 
   void _filterPositionsByDate() {
-
     filteredPositions = aisPoints.where((pos) {
       final utcString = pos.lastPositionUTC;
-      if (utcString == null ) return false;
+      if (utcString == null) return false;
 
       DateTime? positionDate;
 
       try {
-        positionDate = DateTime.parse(
-          utcString.toString(),
-        ).toUtc();
+        positionDate = DateTime.parse(utcString.toString()).toUtc();
       } catch (e) {
         return false;
       }
@@ -41,5 +38,38 @@ class SegmentController extends GetxController with BaseClass {
           positionDate.month == selectedDate.month &&
           positionDate.day == selectedDate.day;
     }).toList();
+  }
+
+  DayReasonCode getReasonCodeByIndex(int index) {
+    /// Safety
+    if (filteredPositions.isEmpty) {
+      return DayReasonCode.NO_DATA;
+    }
+
+    if (index < 0 || index >= filteredPositions.length) {
+      return DayReasonCode.NO_DATA;
+    }
+
+    /// 4️⃣ AT SEA – strong signals
+    if (filteredPositions[index].speed! > 60.0) {
+      return DayReasonCode.OUTLIER_FILTERED;
+    }
+
+    if (filteredPositions[index].speed! > 2.0) {
+      return DayReasonCode.AT_SEA_SPEED_THRESHOLD;
+    }
+
+    if (filteredPositions[index].speed! >= 0.1 &&
+        filteredPositions[index].speed! <= 2.0) {
+      return DayReasonCode.AT_SEA_UNDERWAY_STATUS;
+    }
+
+    /// 6️⃣ IN PORT
+    if (filteredPositions[index].speed! < 0.1) {
+      return DayReasonCode.IN_PORT_STATIONARY;
+    }
+
+    /// Fallback
+    return DayReasonCode.INSUFFICIENT_DATA;
   }
 }
