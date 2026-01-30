@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ship_track_flutter/app/modules/day_segment_details/segment_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -63,15 +65,22 @@ class SegmentDetailsScreen extends StatelessWidget {
                               onTap: () async {
                                 final lat = pos.lat;
                                 final lon = pos.lon;
+
                                 try {
+                                  final Uri url = Platform.isIOS
+                                      ? Uri.parse(
+                                          "http://maps.apple.com/?q=$lat,$lon",
+                                        )
+                                      : Uri.parse(
+                                          "https://www.google.com/maps/search/?api=1&query=$lat,$lon",
+                                        );
                                   await launchUrl(
-                                    Uri.parse(
-                                      "https://www.google.com/maps/search/?api=1&query=$lat,$lon",
-                                    ),
+                                    url,
+                                    mode: LaunchMode.externalApplication,
                                   );
                                 } catch (e) {
                                   controller.showMyAlertDialog(
-                                    message: "Could not open Google Maps $e",
+                                    message: "Could not open map: $e",
                                   );
                                 }
                               },
@@ -119,16 +128,20 @@ class SegmentDetailsScreen extends StatelessWidget {
                             _infoText(
                               'UTC Time',
                               formatTimeFromIso(
-                                (pos.lastPositionUTC ?? DateTime.now().toIso8601String()).toString(),
+                                (pos.lastPositionUTC ??
+                                        DateTime.now().toIso8601String())
+                                    .toString(),
                               ),
                             ),
                             const SizedBox(height: 6),
                             _infoText(
                               'Reason Code',
-                             controller.getReasonCodeByIndex(index).name.toString(),
-                              background: true
+                              controller
+                                  .getReasonCodeByIndex(index)
+                                  .name
+                                  .toString(),
+                              background: true,
                             ),
-
                           ],
                         ),
                       ),
@@ -150,9 +163,9 @@ class SegmentDetailsScreen extends StatelessWidget {
     return "$year-$month-$day $hour :$minute";
   }
 
-  Widget _infoText(String title, String value, {bool background=false}) {
+  Widget _infoText(String title, String value, {bool background = false}) {
     return Container(
-      padding: background ? const EdgeInsets.all(8):null,
+      padding: background ? const EdgeInsets.all(8) : null,
       decoration: BoxDecoration(
         color: background ? Colors.green[50] : Colors.white,
         borderRadius: BorderRadius.circular(10),
