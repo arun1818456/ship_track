@@ -367,7 +367,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 3),
-                                Row(
+                                Wrap(
+                                  runSpacing: 5,
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -391,7 +392,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 5),
+                                    SizedBox(width: 5 , height: 15,),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 6,
@@ -411,7 +412,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               : Colors.green[900],
                                           fontSize: 10,
                                           fontWeight: FontWeight.w600,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
+                                        maxLines: 1,
                                       ),
                                     ),
                                   ],
