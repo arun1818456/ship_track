@@ -30,6 +30,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
             ),
             centerTitle: true,
+            // actions: [
+            //   IconButton(onPressed: (){
+            //     controller.stcwCalculations();
+            //   }, icon: Icon(Icons.stacked_bar_chart,color: AppColor.white,))
+            // ],
           ),
           body: controller.isLoading
               ? Center(child: CircularProgressIndicator())

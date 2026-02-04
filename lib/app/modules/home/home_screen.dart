@@ -1,4 +1,7 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
+
 import '../../../exports.dart';
+import '../../constant/vessel_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,48 +39,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 15),
-                TextFormField(
-                  controller: TextEditingController(
-                    text:
-                        "${controller.selectedVessel?["name"]} , IMO:${controller.selectedVessel?["IMO"]}",
-                  ),
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    hintText: 'Found Vessel',
-                    prefixIcon: const Icon(Icons.directions_boat),
-                  ),
-                ),
+                // TextFormField(
+                //   controller: TextEditingController(
+                //     text:
+                //         "${controller.selectedVessel?["name"]} , IMO:${controller.selectedVessel?["IMO"]}",
+                //   ),
+                //   readOnly: true,
+                //   decoration: InputDecoration(
+                //     hintText: 'Found Vessel',
+                //     prefixIcon: const Icon(Icons.directions_boat),
+                //   ),
+                // ),
                 const SizedBox(height: 15),
 
                 /// Vessel Dropdown
-                // DropdownButtonFormField<String>(
-                //   value: controller.selectedVessel?['name'],
-                //   borderRadius: BorderRadius.circular(25),
-                //   decoration: const InputDecoration(
-                //     labelText: 'Vessel',
-                //     hintText: "Select a vessel",
-                //     prefixIcon: Icon(Icons.directions_boat),
-                //   ),
-                //   items: vesselList
-                //       .map(
-                //         (entry) => DropdownMenuItem<String>(
-                //           value: entry['name'],
-                //           child: Padding(
-                //             padding: const EdgeInsets.symmetric(horizontal: 16),
-                //             child: Text(entry['name']),
-                //           ),
-                //         ),
-                //       )
-                //       .toList(),
-                //   onChanged: (value) {
-                //     controller.selectedVessel = vesselList.firstWhere(
-                //       (e) => e['name'] == value,
-                //     );
-                //     controller.update();
-                //   },
-                // ),
-                //
-                // const SizedBox(height: 15),
+              DropdownButtonFormField2<String>(
+
+                value: controller.selectedVessel?['name'],
+                isDense: true,
+                decoration: InputDecoration(
+                  labelText: 'Vessel',
+                  hintText: 'Select a vessel',
+                  prefixIcon: const Icon(Icons.directions_boat),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                items: vesselList
+                    .map(
+                      (entry) => DropdownMenuItem<String>(
+                    value: entry['name'],
+                    child: Text(entry['name']),
+                  ),
+                )
+                    .toList(),
+                onChanged: (value) {
+                  controller.selectedVessel =
+                      vesselList.firstWhere((e) => e['name'] == value);
+                  controller.update();
+                },
+                dropdownStyleData: DropdownStyleData(
+                  decoration:BoxDecoration(borderRadius: BorderRadius.circular(16))
+                  // borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+
+
+              const SizedBox(height: 15),
 
                 /// Sign-On Date
                 _buildDateField(

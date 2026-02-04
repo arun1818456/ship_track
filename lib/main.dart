@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'exports.dart';
@@ -56,5 +58,6 @@ class MyApp extends StatelessWidget with BaseClass {
 }
 
 printWrapped(text) {
-  JsonEncoder.withIndent('  ').convert(text);
+  final prettyString = const JsonEncoder.withIndent('  ').convert(text);
+  log(prettyString);
 }

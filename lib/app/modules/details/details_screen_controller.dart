@@ -38,35 +38,8 @@ class DetailsController extends GetxController with BaseClass {
     super.onClose();
   }
 
-  // -------------------------------
-  // 🔹 Split Date Range (30 days)
-  // -------------------------------
-  List<Map<String, DateTime>> _splitDateRange(
-      DateTime start,
-      DateTime end,
-      ) {
-    final List<Map<String, DateTime>> ranges = [];
-    DateTime currentStart = start;
-
-    while (currentStart.isBefore(end)) {
-      DateTime currentEnd = currentStart.add(const Duration(days: 29));
-      if (currentEnd.isAfter(end)) {
-        currentEnd = end;
-      }
-
-      ranges.add({
-        "from": currentStart,
-        "to": currentEnd,
-      });
-
-      currentStart = currentEnd.add(const Duration(days: 1));
-    }
-
-    return ranges;
-  }
-
   // -----------------------------------
-  // 🔥 Fetch Historical Track (Batched)
+  // 🔥 Fetch Historical Track
   // -----------------------------------
   Future<void> fetchHistoricalTrack() async {
     try {
@@ -86,12 +59,12 @@ class DetailsController extends GetxController with BaseClass {
         final response = await httpRequest(
           REQUEST.get,
           "$getHistoryByDate$apiKey"
-              "&imo=${selectedVessel?["IMO"]}"
-              "&from=${formatDate(range["from"]!)}"
-              "&to=${formatDate(range["to"]!)}",
+          "&imo=${selectedVessel?["IMO"]}"
+          "&from=${formatDate(range["from"]!)}"
+          "&to=${formatDate(range["to"]!)}",
           {},
         );
-        historicalModelData=HistoricalModelData.fromJson(response);
+        historicalModelData = HistoricalModelData.fromJson(response);
         final tempModel = HistoricalModelData.fromJson(response);
 
         if (tempModel.data?.positions != null) {
@@ -100,14 +73,18 @@ class DetailsController extends GetxController with BaseClass {
               .toList();
 
           aisPoints.addAll(tempPoints);
-          historicalModelData.data?.positions=tempPoints;
+          historicalModelData.data?.positions = tempPoints;
         }
 
         /// 🔹 Small delay to avoid rate-limit
         await Future.delayed(const Duration(milliseconds: 400));
       }
 
-      aisPoints.sort((a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC??DateTime.now()));
+      aisPoints.sort(
+        (a, b) =>
+            a.lastPositionUTC!.compareTo(b.lastPositionUTC ?? DateTime.now()),
+      );
+
       /// 5️⃣ Calculate calendar days
       result = CalendarDayCalculator.calculateDays(
         points: aisPoints,
@@ -125,6 +102,26 @@ class DetailsController extends GetxController with BaseClass {
   }
 
   // -------------------------------
+  // 🔹 Split Date Range (30 days)
+  // -------------------------------
+  List<Map<String, DateTime>> _splitDateRange(DateTime start, DateTime end) {
+    final List<Map<String, DateTime>> ranges = [];
+    DateTime currentStart = start;
+
+    while (currentStart.isBefore(end)) {
+      DateTime currentEnd = currentStart.add(const Duration(days: 29));
+      if (currentEnd.isAfter(end)) {
+        currentEnd = end;
+      }
+
+      ranges.add({"from": currentStart, "to": currentEnd});
+
+      currentStart = currentEnd.add(const Duration(days: 1));
+    }
+    return ranges;
+  }
+
+  // -------------------------------
   // 🔼 Scroll to top helper
   // -------------------------------
   void scrollToTop() {
@@ -134,4 +131,80 @@ class DetailsController extends GetxController with BaseClass {
       curve: Curves.easeOut,
     );
   }
+
+
+  // Future<void> stcwCalculations() async {
+  //   print(">signOnDate >>>$signOnDate");
+  //   print(">> signOffDate >>$signOffDate");
+  //
+  //   DateTime signOnDatePlusOneMonth = signOnDate!.subtract(Duration(days: 30));
+  //
+  //   var ranges = _splitDateRange(signOnDatePlusOneMonth, signOffDate!);
+  //   print(">>>>>> $ranges");
+  //
+  //
+  //   result?.segments.forEach((element) {
+  //     printWrapped(">>>>>>>>>> ${element.toJson()}");
+  //   },);
+  //
+  //
+  //
+  //   try {
+  //     // isLoading = true;
+  //     // aisPoints.clear();
+  //     // update();
+  //     //
+  //     // final apiKey = dotenv.env['APIKEY'] ?? "";
+  //
+  //     /// 1️⃣ Split into 30-day batches
+  //
+  //     // /// 2️⃣ Call API for each batch
+  //     // for (int i = 0; i < ranges.length; i++) {
+  //     //   final range = ranges[i];
+  //     //
+  //     //   final response = await httpRequest(
+  //     //     REQUEST.get,
+  //     //     "$getHistoryByDate$apiKey"
+  //     //         "&imo=${selectedVessel?["IMO"]}"
+  //     //         "&from=${formatDate(range["from"]!)}"
+  //     //         "&to=${formatDate(range["to"]!)}",
+  //     //     {},
+  //     //   );
+  //     //   historicalModelData = HistoricalModelData.fromJson(response);
+  //     //   final tempModel = HistoricalModelData.fromJson(response);
+  //     //
+  //     //   if (tempModel.data?.positions != null) {
+  //     //     final tempPoints = tempModel.data!.positions!
+  //     //         .map((p) => Positions.fromJson(p.toJson()))
+  //     //         .toList();
+  //     //
+  //     //     aisPoints.addAll(tempPoints);
+  //     //     historicalModelData.data?.positions = tempPoints;
+  //     //   }
+  //     //
+  //     //   /// 🔹 Small delay to avoid rate-limit
+  //     //   await Future.delayed(const Duration(milliseconds: 400));
+  //     // }
+  //     //
+  //     // aisPoints.sort(
+  //     //       (a, b) =>
+  //     //       a.lastPositionUTC!.compareTo(b.lastPositionUTC ?? DateTime.now()),
+  //     // );
+  //
+  //     /// 5️⃣ Calculate calendar days
+  //     // result = CalendarDayCalculator.calculateDays(
+  //     //   points: aisPoints,
+  //     //   signOnDate: signOnDate,
+  //     //   signOffDate: signOffDate,
+  //     // );
+  //     //
+  //     // isLoading = false;
+  //     // update();
+  //   } catch (e) {
+  //     // isLoading = false;
+  //     // update();
+  //     // showMyAlertDialog(message: e.toString());
+  //   }
+  // }
+
 }
