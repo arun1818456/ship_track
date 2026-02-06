@@ -1,17 +1,18 @@
-import 'package:ship_track_flutter/app/models/calendarday_model.dart';
+import 'package:ship_track_flutter/app/models/calendar_day_model.dart';
 import 'package:ship_track_flutter/app/models/day_segment_model.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
+import '../constant/enums.dart';
 import '../services/ais_classifier.dart';
 
 /// Calculate calendar days from AIS data
 class CalendarDayCalculator {
-  static CalendarDayResult calculateDays({
+  static CalendarDaysResult calculateDays({
     required List<Positions> points,
     DateTime? signOnDate,
     DateTime? signOffDate,
   }) {
     if (points.isEmpty && signOnDate == null && signOffDate == null) {
-      return CalendarDayResult(
+      return CalendarDaysResult(
         totalCalendarDays: 0,
         totalAtSeaDays: 0,
         totalInPortDays: 0,
@@ -20,20 +21,12 @@ class CalendarDayCalculator {
     }
 
     // Sort points
-    final sortedPoints = List<Positions>.from(points)
-      ..sort((a, b) =>
-          a.lastPositionUTC!.compareTo(b.lastPositionUTC!));
+    final sortedPointsList = List<Positions>.from(points)
+      ..sort((a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC!));
 
-    final firstTimestamp = sortedPoints.isNotEmpty
-        ? sortedPoints.first.lastPositionUTC
-        : signOnDate;
-
-    final lastTimestamp = sortedPoints.isNotEmpty
-        ? sortedPoints.last.lastPositionUTC
-        : signOffDate;
-
-    final effectiveSignOn = signOnDate ?? firstTimestamp!;
-    final effectiveSignOff = signOffDate ?? lastTimestamp!;
+    final effectiveSignOn =
+        signOnDate ?? DateTime.now().subtract(Duration(days: 15));
+    final effectiveSignOff = signOffDate ?? DateTime.now();
 
     final totalCalendarDays =
         effectiveSignOff.difference(effectiveSignOn).inDays + 1;
@@ -42,8 +35,8 @@ class CalendarDayCalculator {
     // 🔹 Group AIS points by day
     // -------------------------------
     final Map<DateTime, List<Positions>> pointsByDay = {};
-
-    for (final point in sortedPoints) {
+    // add points to the map according to date (day){2025-11-05 00:00:00.000:[{Position1},{Position2},...]}
+    for (final point in sortedPointsList) {
       if (point.lastPositionUTC!.isBefore(effectiveSignOn) ||
           point.lastPositionUTC!.isAfter(effectiveSignOff)) {
         continue;
@@ -57,12 +50,17 @@ class CalendarDayCalculator {
 
       pointsByDay.putIfAbsent(day, () => []).add(point);
     }
-
     // -------------------------------
     // 🔹 Iterate ALL calendar days
     // -------------------------------
     int atSeaDays = 0;
     int inPortDays = 0;
+    // int actualSeaDays = 0;
+    // int standByDays = 0;
+    // int yardDays = 0;
+    // int unknownDays = 0;
+    // int totalCountable = 0;
+
     final List<DaySegment> segments = [];
 
     for (int i = 0; i < totalCalendarDays; i++) {
@@ -76,11 +74,11 @@ class CalendarDayCalculator {
 
       bool isAtSea = false;
 
+
       if (dayPoints.isNotEmpty) {
         final classifications = dayPoints
-            .map((p) => AISClassifier.classify(p))
+            .map((p) => AISClassifier.classifyType(p))
             .toList();
-
         isAtSea = classifications.contains(VesselStatus.atSea);
       }
 
@@ -90,23 +88,25 @@ class CalendarDayCalculator {
         inPortDays++;
       }
 
+      /////check reason code for day
+     DayReasonCode reasonCode = AISClassifier.getReasonCode(dayPoints);
+
       segments.add(
         DaySegment(
           date: day,
           status: isAtSea
               ? VesselStatus.atSea
               : VesselStatus.inPort, // default when no data
-          pointCount: dayPoints.length, // 👈 0 if missing
+          pointCount: dayPoints.length,
+          reasonCode: reasonCode, // 👈 0 if missing
         ),
       );
     }
 
-    return CalendarDayResult(
+    return CalendarDaysResult(
       totalCalendarDays: totalCalendarDays,
       totalAtSeaDays: atSeaDays,
       totalInPortDays: inPortDays,
-      firstTimestamp: firstTimestamp,
-      lastTimestamp: lastTimestamp,
       segments: segments,
     );
   }

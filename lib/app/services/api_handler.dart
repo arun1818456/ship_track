@@ -48,11 +48,6 @@ Future<dynamic> httpRequest(
             headers: {
               "Content-Type": "application/json",
               "Authorization": token.isNotEmpty ? "Bearer $token" : '',
-              // HttpHeaders.contentTypeHeader: "application/json",
-              // 'Content-Type': 'application/json; charset=UTF-8',
-              // HttpHeaders.authorizationHeader: token,
-              // 'token': token,
-              // HttpHeaders.authorizationHeader: 'Bearer $token',
             },
           );
           break;
@@ -65,14 +60,6 @@ Future<dynamic> httpRequest(
                     "Content-Type": "application/json",
                     "Authorization": "Bearer $token",
                   },
-            // headers: (token.isEmpty)
-            //     ? {HttpHeaders.contentTypeHeader: "application/json"}
-            //     : {
-            //         HttpHeaders.contentTypeHeader: "application/json",
-            //         // HttpHeaders.authorizationHeader: token,
-            //         // 'token': token,
-            //         HttpHeaders.authorizationHeader: 'Bearer $token',
-            //       },
             body: data,
           );
           break;
@@ -81,8 +68,6 @@ Future<dynamic> httpRequest(
             Uri.parse("$baseUrl$url"),
             headers: {
               HttpHeaders.contentTypeHeader: "application/json",
-              // HttpHeaders.authorizationHeader:  token,
-              // 'token': token,
               HttpHeaders.authorizationHeader: 'Bearer $token',
             },
             body: data,
@@ -104,10 +89,6 @@ Future<dynamic> httpRequest(
             headers: {
               "Content-Type": "application/json",
               "Authorization": "Bearer $token",
-              // HttpHeaders.contentTypeHeader: "application/json",
-              // // HttpHeaders.authorizationHeader:  token,
-              // // 'token': token,
-              // HttpHeaders.authorizationHeader: 'Bearer $token',
             },
             body: data,
           );
@@ -123,8 +104,6 @@ Future<dynamic> httpRequest(
     }
     if (value.statusCode == 401 &&
         jsonDecode(value.body)["message"].toString() == "Please authenticate") {
-      // ShowMyDialogs.onSessionExpired(Get.context,
-      //     title: "Login Expired", onBtnClick: (a) {});
       return {};
     } else {
       responseJson = returnResponse(value);
@@ -170,34 +149,6 @@ String getMessage(http.Response response) {
   if (msg != null) {
     return msg.contains("HandshakeException") ? "no_internet".tr : msg;
   } else {
-    // return "ERROR ${response.statusCode} - NO ERROR MESSAGE RECEIVED FROM BACKEND ";
     return "Please Refresh Page Network Problem";
   }
 }
-
-// Future<dynamic> uploadRequest(file, {type, ext}) async {
-//   var fle = File(file);
-//   // var img = Image(image: FileImage(File(file))); //file(new File(file);
-//   var stream = http.ByteStream(DelegatingStream.typed(fle.openRead()));
-//   var length = await fle.length();
-//   var uri = Uri.parse('$baseUrl$postImageUrl');
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   String? token = prefs.getString('token');
-//   var request = http.MultipartRequest("POST", uri);
-//   var multipartFile = http.MultipartFile('image', stream, length,
-//       filename: basename(fle.path),
-//       contentType: MediaType(type ?? 'image', ext ?? 'jpg'));
-//   request.files.add(multipartFile);
-//   request.headers.addAll({
-//     HttpHeaders.contentTypeHeader: "application/json",
-//     HttpHeaders.authorizationHeader: 'Bearer $token',
-//     // 'Bearer': token,
-//   });
-//   var response = await request.send();
-//   var responseData = await response.stream.toBytes();
-//   var responseString = String.fromCharCodes(responseData);
-//   // print(response);
-//   // print(responseData);
-//   // print(responseString);
-//   return jsonDecode(responseString)['image'];
-// }
