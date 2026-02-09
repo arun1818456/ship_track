@@ -83,6 +83,42 @@ class AISClassifier {
     return DayReasonCode.MIXED_BEHAVIOR;
   }
 
+  ///  Calculations of STCW Data
+
+  static StcwDayResult stcwCalculations(List<Positions> classifications) {
+    // 2️⃣ No data → UNKNOWN
+    if (classifications.isEmpty) return StcwDayResult.unknown;
+
+    // 3️⃣ Calculate total "at sea" duration (speed > 2 knots)
+    classifications.sort(
+      (a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC!),
+    );
+
+    Duration atSeaDuration = Duration.zero;
+
+    for (int i = 0; i < classifications.length - 1; i++) {
+      final curr = classifications[i];
+      final next = classifications[i + 1];
+
+      if (curr.lastPositionUTC == null || next.lastPositionUTC == null) {
+        continue;
+      }
+
+      final diff = next.lastPositionUTC!.difference(curr.lastPositionUTC!);
+
+      if ((curr.speed ?? 0) > 2.0) {
+        atSeaDuration += diff;
+      }
+    }
+
+    // 4️⃣ Assign status based on 4-hour rule
+    if (atSeaDuration.inHours >= 4) {
+      return StcwDayResult.actual_sea;
+    } else {
+      return StcwDayResult.stand_by;
+    }
+  }
+
   /// ///// material for  Classifications
 
   static double haversineDistance(

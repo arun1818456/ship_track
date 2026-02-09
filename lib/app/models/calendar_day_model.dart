@@ -4,6 +4,10 @@ class CalendarDaysResult {
   final int totalCalendarDays;
   final int totalAtSeaDays;
   final int totalInPortDays;
+  final int totalActualSeaDays;
+  final int totalStandByDays;
+  final int totalYardDays;
+  final int totalUnknownDays;
   final List<DaySegment> segments;
 
   CalendarDaysResult({
@@ -11,6 +15,10 @@ class CalendarDaysResult {
     required this.totalAtSeaDays,
     required this.totalInPortDays,
     required this.segments,
+    required this.totalActualSeaDays,
+    required this.totalStandByDays,
+    required this.totalYardDays,
+    required this.totalUnknownDays,
   });
 
   Map<String, dynamic> toJson() {
@@ -19,6 +27,10 @@ class CalendarDaysResult {
       'total_at_sea_days': totalAtSeaDays,
       'total_in_port_days': totalInPortDays,
       'segments': segments.map((s) => s.toJson()).toList(),
+      'total_actual_sea_days': totalActualSeaDays,
+      'total_stand_by_days': totalStandByDays,
+      'total_yard_days': totalYardDays,
+      'total_unknown_days': totalUnknownDays,
     };
   }
 }

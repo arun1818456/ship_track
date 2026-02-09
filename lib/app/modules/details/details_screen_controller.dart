@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
 import '../../../exports.dart';
+import '../../constant/dummy_list_data.dart';
 
 class DetailsController extends GetxController with BaseClass {
   HistoricalModelData historicalModelData = HistoricalModelData();
@@ -46,45 +47,45 @@ class DetailsController extends GetxController with BaseClass {
       isLoading = true;
       aisPoints.clear();
       update();
-
-      final apiKey = dotenv.env['APIKEY'] ?? "";
-
-      /// 1️⃣ Split into 30-day batches
-      final ranges = _splitDateRange(signOnDate!, signOffDate!);
-
+      //
+      // final apiKey = dotenv.env['APIKEY'] ?? "";
+      //
+      // /// 1️⃣ Split into 30-day batches
+      // final ranges = _splitDateRange(signOnDate!, signOffDate!);
+      //
       // 2️⃣ Call API for each batch
-      for (int i = 0; i < ranges.length; i++) {
-        final range = ranges[i];
-
-        final response = await httpRequest(
-          REQUEST.get,
-          "$getHistoryByDate$apiKey"
-          "&imo=${selectedVessel?["IMO"]}"
-          "&from=${formatDate(range["from"]!)}"
-          "&to=${formatDate(range["to"]!)}",
-          {},
-        );
-        historicalModelData = HistoricalModelData.fromJson(response);
-        final tempModel = HistoricalModelData.fromJson(response);
-
-        if (tempModel.data?.positions != null) {
-          final tempPoints = tempModel.data!.positions!
-              .map((p) => Positions.fromJson(p.toJson()))
-              .toList();
-
-          aisPoints.addAll(tempPoints);
-          historicalModelData.data?.positions = tempPoints;
-        }
-
-        /// 🔹 Small delay to avoid rate-limit
-        await Future.delayed(const Duration(milliseconds: 400));
-      }
-      // historicalModelData = HistoricalModelData.fromJson(dataApi);
-      // aisPoints =
-      //     historicalModelData.data?.positions!
+      // for (int i = 0; i < ranges.length; i++) {
+      //   final range = ranges[i];
+      //
+      //   final response = await httpRequest(
+      //     REQUEST.get,
+      //     "$getHistoryByDate$apiKey"
+      //     "&imo=${selectedVessel?["IMO"]}"
+      //     "&from=${formatDate(range["from"]!)}"
+      //     "&to=${formatDate(range["to"]!)}",
+      //     {},
+      //   );
+      //   historicalModelData = HistoricalModelData.fromJson(response);
+      //   final tempModel = HistoricalModelData.fromJson(response);
+      //
+      //   if (tempModel.data?.positions != null) {
+      //     final tempPoints = tempModel.data!.positions!
       //         .map((p) => Positions.fromJson(p.toJson()))
-      //         .toList() ??
-      //     [];
+      //         .toList();
+      //
+      //     aisPoints.addAll(tempPoints);
+      //     historicalModelData.data?.positions = tempPoints;
+      //   }
+      //
+      //   /// 🔹 Small delay to avoid rate-limit
+      //   await Future.delayed(const Duration(milliseconds: 400));
+      // }
+      historicalModelData = HistoricalModelData.fromJson(dataApi);
+      aisPoints =
+          historicalModelData.data?.positions!
+              .map((p) => Positions.fromJson(p.toJson()))
+              .toList() ??
+          [];
       aisPoints.sort(
         (a, b) =>
             a.lastPositionUTC!.compareTo(b.lastPositionUTC ?? DateTime.now()),
@@ -137,46 +138,8 @@ class DetailsController extends GetxController with BaseClass {
     );
   }
 
-  //--------------------------------
-  // 🔥 STCW Calculations
-  //--------------------------------
-  StcwDayResult stcwCalculations(DateTime date) {
-    // 1️⃣ Filter AIS positions for the given date
-    final dayPoints = aisPoints.where((p) {
-      final utc = p.lastPositionUTC;
-      if (utc == null) return false;
-      return utc.year == date.year &&
-          utc.month == date.month &&
-          utc.day == date.day;
-    }).toList();
+  countableDays(List<Positions> aisPoints) {
 
-    // 2️⃣ No data → UNKNOWN
-    if (dayPoints.isEmpty) return StcwDayResult.unknown;
-
-    // 3️⃣ Calculate total "at sea" duration (speed > 2 knots)
-    dayPoints.sort((a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC!));
-
-    Duration atSeaDuration = Duration.zero;
-
-    for (int i = 0; i < dayPoints.length - 1; i++) {
-      final curr = dayPoints[i];
-      final next = dayPoints[i + 1];
-
-      if (curr.lastPositionUTC == null || next.lastPositionUTC == null)
-        continue;
-
-      final diff = next.lastPositionUTC!.difference(curr.lastPositionUTC!);
-
-      if ((curr.speed ?? 0) > 2.0) {
-        atSeaDuration += diff;
-      }
-    }
-
-    // 4️⃣ Assign status based on 4-hour rule
-    if (atSeaDuration.inHours >= 4) {
-      return StcwDayResult.actual_sea;
-    } else {
-      return StcwDayResult.stand_by;
-    }
   }
+
 }

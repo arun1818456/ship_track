@@ -180,7 +180,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             // STCW Stats
             _buildStatRow(
               'Actual Sea Days',
-              "65",
+              (controller.calendarDayCalculation?.totalActualSeaDays ?? 0)
+                  .toString(),
               Icons.directions_boat,
               Colors.blue,
               context,
@@ -188,7 +189,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const Divider(),
             _buildStatRow(
               'Standby Days',
-              "52",
+              (controller.calendarDayCalculation?.totalStandByDays ?? 0)
+                  .toString(),
               Icons.pause_circle,
               Colors.orange,
               context,
@@ -196,7 +198,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const Divider(),
             _buildStatRow(
               'Yard Days',
-              "50",
+              (controller.calendarDayCalculation?.totalYardDays ?? 0)
+                  .toString(),
               Icons.construction,
               Colors.brown,
               context,
@@ -204,7 +207,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const Divider(),
             _buildStatRow(
               'Unknown Days',
-              "52",
+              (controller.calendarDayCalculation?.totalUnknownDays ?? 0)
+                  .toString(),
               Icons.help_outline,
               Colors.grey,
               context,
@@ -212,7 +216,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             const Divider(thickness: 1.2),
             _buildStatRow(
               'Total Countable',
-              "30",
+              "--",
               Icons.check_circle,
               Colors.green,
               context,
@@ -574,17 +578,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black26,),
+                              border: Border.all(
+                                color: getColor(
+                                  controller
+                                      .calendarDayCalculation!
+                                      .segments[index]
+                                      .stcwDayResult,
+                                ),
+                              ),
                               color: getColor(
-                                controller.stcwCalculations(segment.date),
-                              )?.withValues(alpha: 0.2),
+                                controller
+                                    .calendarDayCalculation!
+                                    .segments[index]
+                                    .stcwDayResult,
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              "Service :- ${controller.stcwCalculations(segment.date).name.toString()}",
+                              "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString() ?? ""}",
                               style: TextStyle(
                                 color: getColor(
-                                  controller.stcwCalculations(segment.date),
+                                  controller
+                                      .calendarDayCalculation!
+                                      .segments[index]
+                                      .stcwDayResult,
                                 ),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -648,7 +665,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Color? getColor(StcwDayResult stcwCalculations) {
+  Color getColor(StcwDayResult stcwCalculations) {
     switch (stcwCalculations) {
       case StcwDayResult.actual_sea:
         return Colors.blue;

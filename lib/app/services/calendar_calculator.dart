@@ -17,6 +17,10 @@ class CalendarDayCalculator {
         totalAtSeaDays: 0,
         totalInPortDays: 0,
         segments: [],
+        totalActualSeaDays: 0,
+        totalStandByDays: 0,
+        totalYardDays: 0,
+        totalUnknownDays: 0,
       );
     }
 
@@ -55,11 +59,10 @@ class CalendarDayCalculator {
     // -------------------------------
     int atSeaDays = 0;
     int inPortDays = 0;
-    // int actualSeaDays = 0;
-    // int standByDays = 0;
-    // int yardDays = 0;
-    // int unknownDays = 0;
-    // int totalCountable = 0;
+    int actualSeaDays = 0;
+    int standByDays = 0;
+    int yardDays = 0;
+    int unknownDays = 0;
 
     final List<DaySegment> segments = [];
 
@@ -89,16 +92,28 @@ class CalendarDayCalculator {
       }
 
       /////check reason code for day
-     DayReasonCode reasonCode = AISClassifier.getReasonCode(dayPoints);
+      DayReasonCode reasonCode = AISClassifier.getReasonCode(dayPoints);
+      StcwDayResult stcwDayResult = AISClassifier.stcwCalculations(dayPoints);
+
+      if (stcwDayResult == StcwDayResult.actual_sea) {
+        actualSeaDays++;
+      } else if (stcwDayResult == StcwDayResult.stand_by) {
+        standByDays++;
+      } else if (stcwDayResult == StcwDayResult.yard) {
+        yardDays++;
+      } else if (stcwDayResult == StcwDayResult.unknown) {
+        unknownDays++;
+      }
 
       segments.add(
         DaySegment(
           date: day,
           status: isAtSea
               ? VesselStatus.atSea
-              : VesselStatus.inPort, // default when no data
+              : VesselStatus.inPort,
           pointCount: dayPoints.length,
-          reasonCode: reasonCode, // 👈 0 if missing
+          reasonCode: reasonCode,
+          stcwDayResult: stcwDayResult,
         ),
       );
     }
@@ -108,6 +123,10 @@ class CalendarDayCalculator {
       totalAtSeaDays: atSeaDays,
       totalInPortDays: inPortDays,
       segments: segments,
+      totalActualSeaDays: actualSeaDays,
+      totalStandByDays: standByDays,
+      totalYardDays: yardDays,
+      totalUnknownDays: unknownDays,
     );
   }
 }
