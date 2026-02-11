@@ -1,11 +1,13 @@
 import '../../exports.dart';
 
 class DaySegment {
-  final DateTime date;
-  final VesselStatus status;
-  final int pointCount;
-  final DayReasonCode reasonCode;
-  final StcwDayResult stcwDayResult;
+   DateTime date;
+   VesselStatus status;
+   int pointCount;
+   DayReasonCode reasonCode;
+   StcwDayResult stcwDayResult;
+   bool isCountedDay;
+   String showError;
 
   DaySegment({
     required this.date,
@@ -13,6 +15,8 @@ class DaySegment {
     required this.pointCount,
     required this.reasonCode,
     required this.stcwDayResult,
+    required this.isCountedDay,
+    required this.showError,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,6 +26,8 @@ class DaySegment {
       'point_count': pointCount,
       'reason_code': reasonCode,
       'stcw_day_result': stcwDayResult,
+      'is_counted_day': isCountedDay,
+      'show_error': showError,
     };
   }
 }

@@ -29,6 +29,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
             ),
             centerTitle: true,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  controller.setCalculateStcwRule();
+                },
+                icon: Icon(Icons.stacked_bar_chart),
+              ),
+            ],
           ),
 
           // Main body
@@ -195,15 +203,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
               Colors.orange,
               context,
             ),
-            const Divider(),
-            _buildStatRow(
-              'Yard Days',
-              (controller.calendarDayCalculation?.totalYardDays ?? 0)
-                  .toString(),
-              Icons.construction,
-              Colors.brown,
-              context,
-            ),
+            // const Divider(),
+            // _buildStatRow(
+            //   'Yard Days',
+            //   (controller.calendarDayCalculation?.totalYardDays ?? 0)
+            //       .toString(),
+            //   Icons.construction,
+            //   Colors.brown,
+            //   context,
+            // ),
             const Divider(),
             _buildStatRow(
               'Unknown Days',
@@ -213,14 +221,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
               Colors.grey,
               context,
             ),
-            const Divider(thickness: 1.2),
-            _buildStatRow(
-              'Total Countable',
-              "--",
-              Icons.check_circle,
-              Colors.green,
-              context,
-            ),
+            // const Divider(thickness: 1.2),
+            // _buildStatRow(
+            //   'Total Countable',
+            //   "--",
+            //   Icons.check_circle,
+            //   Colors.green,
+            //   context,
+            // ),
           ],
         ),
       ),
@@ -423,12 +431,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: isAtSea ? Colors.blue[50] : Colors.green[50],
+                        // color: isAtSea ? Colors.blue[50] : Colors.green[50],
+                        color: getColor(
+                          controller
+                              .calendarDayCalculation!
+                              .segments[index]
+                              .stcwDayResult,
+                        ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isAtSea
-                              ? Colors.blue[200]!
-                              : Colors.green[200]!,
+                          color:  getColor(
+                            controller
+                                .calendarDayCalculation!
+                                .segments[index]
+                                .stcwDayResult,
+                          ).withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -446,12 +463,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Icon(
-                                  isAtSea
+                                  controller
+                                      .calendarDayCalculation!
+                                      .segments[index]
+                                      .stcwDayResult==StcwDayResult.actual_sea
                                       ? Icons.directions_boat
                                       : Icons.anchor,
-                                  color: isAtSea
-                                      ? Colors.blue[700]
-                                      : Colors.green[700],
+                                  color:  getColor(
+                                    controller
+                                        .calendarDayCalculation!
+                                        .segments[index]
+                                        .stcwDayResult,
+                                  ),
                                   size: 16,
                                 ),
                               ),
@@ -468,67 +491,103 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 3),
-                                    Wrap(
-                                      runSpacing: 5,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isAtSea
-                                                ? Colors.blue[200]
-                                                : Colors.green[200],
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            isAtSea ? 'AT_SEA' : 'IN_PORT',
-                                            style: TextStyle(
-                                              color: isAtSea
-                                                  ? Colors.blue[900]
-                                                  : Colors.green[900],
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 5, height: 15),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isAtSea
-                                                ? Colors.blue[200]
-                                                : Colors.green[200],
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Text(
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        // border: Border.all(
+                                        //   color: getColor(
+                                        //     controller
+                                        //         .calendarDayCalculation!
+                                        //         .segments[index]
+                                        //         .stcwDayResult,
+                                        //   ),
+                                        // ),
+                                        color: getColor(
+                                          controller
+                                              .calendarDayCalculation!
+                                              .segments[index]
+                                              .stcwDayResult,
+                                        ).withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString() ?? ""}",
+                                        style: TextStyle(
+                                          color: getColor(
                                             controller
                                                 .calendarDayCalculation!
                                                 .segments[index]
-                                                .reasonCode
-                                                .name
-                                                .toString(),
-                                            style: TextStyle(
-                                              color: isAtSea
-                                                  ? Colors.blue[900]
-                                                  : Colors.green[900],
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            maxLines: 1,
+                                                .stcwDayResult,
                                           ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
                                         ),
-                                      ],
+                                      ),
                                     ),
+                                    // Wrap(
+                                    //   runSpacing: 5,
+                                    //   children: [
+                                    //     Container(
+                                    //       padding: const EdgeInsets.symmetric(
+                                    //         horizontal: 6,
+                                    //         vertical: 2,
+                                    //       ),
+                                    //       decoration: BoxDecoration(
+                                    //         color: isAtSea
+                                    //             ? Colors.blue[200]
+                                    //             : Colors.green[200],
+                                    //         borderRadius: BorderRadius.circular(
+                                    //           4,
+                                    //         ),
+                                    //       ),
+                                    //       child: Text(
+                                    //         isAtSea ? 'AT_SEA' : 'IN_PORT',
+                                    //         style: TextStyle(
+                                    //           color: isAtSea
+                                    //               ? Colors.blue[900]
+                                    //               : Colors.green[900],
+                                    //           fontSize: 10,
+                                    //           fontWeight: FontWeight.w600,
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //     SizedBox(width: 5, height: 15),
+                                    //     Container(
+                                    //       padding: const EdgeInsets.symmetric(
+                                    //         horizontal: 6,
+                                    //         vertical: 2,
+                                    //       ),
+                                    //       decoration: BoxDecoration(
+                                    //         color: isAtSea
+                                    //             ? Colors.blue[200]
+                                    //             : Colors.green[200],
+                                    //         borderRadius: BorderRadius.circular(
+                                    //           4,
+                                    //         ),
+                                    //       ),
+                                    //       child: Text(
+                                    //         controller
+                                    //             .calendarDayCalculation!
+                                    //             .segments[index]
+                                    //             .reasonCode
+                                    //             .name
+                                    //             .toString(),
+                                    //         style: TextStyle(
+                                    //           color: isAtSea
+                                    //               ? Colors.blue[900]
+                                    //               : Colors.green[900],
+                                    //           fontSize: 10,
+                                    //           fontWeight: FontWeight.w600,
+                                    //           overflow: TextOverflow.ellipsis,
+                                    //         ),
+                                    //         maxLines: 1,
+                                    //       ),
+                                    //     ),
+                                    //   ],
+                                    // ),
                                   ],
                                 ),
                               ),
@@ -538,9 +597,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isAtSea
-                                      ? Colors.blue[200]
-                                      : Colors.green[200],
+                                  color: getColor(
+                                    controller
+                                        .calendarDayCalculation!
+                                        .segments[index]
+                                        .stcwDayResult,
+                                  ).withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Row(
@@ -551,18 +613,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: isAtSea
-                                            ? Colors.blue[900]
-                                            : Colors.green[900],
+                                        color:  getColor(
+                                          controller
+                                              .calendarDayCalculation!
+                                              .segments[index]
+                                              .stcwDayResult,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 4),
                                     Icon(
                                       Icons.circle,
                                       size: 6,
-                                      color: isAtSea
-                                          ? Colors.blue[900]
-                                          : Colors.green[900],
+                                      color: getColor(
+                                        controller
+                                            .calendarDayCalculation!
+                                            .segments[index]
+                                            .stcwDayResult,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -571,45 +639,37 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               Icon(Icons.arrow_forward_ios, size: 12),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: getColor(
-                                  controller
-                                      .calendarDayCalculation!
-                                      .segments[index]
-                                      .stcwDayResult,
+
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                (controller
+                                        .calendarDayCalculation!
+                                        .segments[index]
+                                        .isCountedDay)
+                                    ? "CountAble"
+                                    : 'non-countable',
+                                style: TextStyle(
+                                  color:
+                                      controller
+                                          .calendarDayCalculation!
+                                          .segments[index]
+                                          .isCountedDay
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              color: getColor(
-                                controller
-                                    .calendarDayCalculation!
-                                    .segments[index]
-                                    .stcwDayResult,
-                              ).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString() ?? ""}",
-                              style: TextStyle(
-                                color: getColor(
-                                  controller
-                                      .calendarDayCalculation!
-                                      .segments[index]
-                                      .stcwDayResult,
-                                ),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              Row(
+                                children: [
+                                  Text("Add Yard day"),
+                                  Icon(Icons.keyboard_arrow_down, size: 12)
+                                ],
                               ),
-                            ),
+                            ],
                           ),
-                          // const SizedBox(height: 5),
-                          // Text("Standby Day: 3 of 14"),
                         ],
                       ),
                     ),
@@ -670,7 +730,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       case StcwDayResult.actual_sea:
         return Colors.blue;
       case StcwDayResult.stand_by:
-        return Colors.orange;
+        return Colors.green;
       case StcwDayResult.yard:
         return Colors.brown;
       case StcwDayResult.unknown:

@@ -114,6 +114,8 @@ class CalendarDayCalculator {
           pointCount: dayPoints.length,
           reasonCode: reasonCode,
           stcwDayResult: stcwDayResult,
+          isCountedDay: false,
+          showError: "",
         ),
       );
     }

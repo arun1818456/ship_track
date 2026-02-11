@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:ship_track_flutter/app/models/historical_model.dart';
 import '../../exports.dart';
+import '../models/day_segment_model.dart';
 
 /// Classification logic for AT_SEA / IN_PORT
 class AISClassifier {
@@ -139,4 +140,125 @@ class AISClassifier {
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
+
+  //// Countable day calculations
+  DaySegment countAbleDays(List<DaySegment> segments, DaySegment daySegment) {
+
+    print("\n================ STCW COUNT DEBUG START ================");
+    print("Target Day => ${daySegment.date}");
+    print("Target Status => ${daySegment.stcwDayResult}");
+
+    int seaCount = 0;
+    int standbyCount = 0;
+    int unknownCount = 0;
+
+    bool countedDay = false;
+    String errorMessage = "";
+    StcwDayResult lastDay= StcwDayResult.unknown;
+
+
+    for (DaySegment segment in segments) {
+
+      print("\n---- Processing Segment ----");
+      print("Date => ${segment.date}");
+      print("Status => ${segment.stcwDayResult}");
+      print("Before Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount");
+
+      if (segment.stcwDayResult == StcwDayResult.actual_sea) {
+
+        if (standbyCount != 0 || unknownCount != 0) {
+          print("Resetting counters due to new SEA block");
+
+          standbyCount = 0;
+          unknownCount = 0;
+          seaCount = 1;
+        } else {
+          seaCount++;
+        }
+        lastDay = StcwDayResult.actual_sea;
+        countedDay = true;
+      }
+
+      else if (segment.stcwDayResult == StcwDayResult.stand_by) {
+
+        if (seaCount > standbyCount) {
+          standbyCount++;
+          countedDay = true;
+          print("Standby counted (within sea balance)");
+        }
+
+        else if (seaCount <= standbyCount && standbyCount < 14) {
+          standbyCount++;
+          countedDay = false;
+          print("Standby exists but exceeds sea balance");
+        }
+
+        else if (standbyCount > seaCount && standbyCount > 14) {
+          standbyCount++;
+          countedDay = false;
+          errorMessage = "Exceeds 14-day standby cap";
+          print("ERROR => $errorMessage");
+        }
+        lastDay = StcwDayResult.stand_by;
+      }
+
+      else if (segment.stcwDayResult == StcwDayResult.yard) {
+        countedDay = true;
+        lastDay = StcwDayResult.yard;
+        print("Yard Day => Always Counted");
+      }
+
+      else if (segment.stcwDayResult == StcwDayResult.unknown) {
+
+        if (seaCount > unknownCount && countedDay==true && seaCount>standbyCount) {
+          unknownCount++;
+          standbyCount++;
+          countedDay = true;
+          print("Unknown counted within sea balance");
+        } else {
+          unknownCount++;
+          countedDay = false;
+          print("Unknown NOT counted");
+        }
+        lastDay= StcwDayResult.unknown;
+      }
+
+      print("After Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount");
+      print("Counted Decision => $countedDay");
+
+      // 🔥 Target Day Found
+      if (segment.date == daySegment.date) {
+
+        final data = DaySegment(
+          date: daySegment.date,
+          status: daySegment.status,
+          pointCount: daySegment.pointCount,
+          reasonCode: daySegment.reasonCode,
+          stcwDayResult: daySegment.stcwDayResult,
+          isCountedDay: countedDay,
+          showError: errorMessage,
+        );
+
+        print("\n***** FINAL RESULT FOR TARGET DAY *****");
+        print(data.toJson());
+        print("================ STCW COUNT DEBUG END ================\n");
+
+        return data;
+      }
+    }
+
+    print("Target day not found in segment list");
+    print("================ STCW COUNT DEBUG END ================\n");
+
+    return DaySegment(
+      date: daySegment.date,
+      status: daySegment.status,
+      pointCount: daySegment.pointCount,
+      reasonCode: daySegment.reasonCode,
+      stcwDayResult: daySegment.stcwDayResult,
+      isCountedDay: daySegment.isCountedDay,
+      showError: daySegment.showError,
+    );
+  }
+
 }
