@@ -44,7 +44,7 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isBorderEnable ? Colors.white : color,
+        color: color ?? Colors.white,
         borderRadius: BorderRadius.circular(radius ?? 50),
       ),
       height: buttonHeight ?? 45,
@@ -53,7 +53,7 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: loading == true ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColor.appColor,
+          backgroundColor: color ?? AppColor.appColor,
           shadowColor: AppColor.appColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius ?? 10),

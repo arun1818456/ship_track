@@ -143,92 +143,90 @@ class AISClassifier {
 
   //// Countable day calculations
   DaySegment countAbleDays(List<DaySegment> segments, DaySegment daySegment) {
-
-    print("\n================ STCW COUNT DEBUG START ================");
-    print("Target Day => ${daySegment.date}");
-    print("Target Status => ${daySegment.stcwDayResult}");
+    // print("\n================ STCW COUNT DEBUG START ================");
+    // print("Target Day => ${daySegment.date}");
+    // print("Target Status => ${daySegment.stcwDayResult}");
 
     int seaCount = 0;
     int standbyCount = 0;
     int unknownCount = 0;
-
+    int yardCount = 0;
     bool countedDay = false;
     String errorMessage = "";
-    StcwDayResult lastDay= StcwDayResult.unknown;
-
 
     for (DaySegment segment in segments) {
-
-      print("\n---- Processing Segment ----");
-      print("Date => ${segment.date}");
-      print("Status => ${segment.stcwDayResult}");
-      print("Before Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount");
+      // print("\n---- Processing Segment ----");
+      // print("Date => ${segment.date}");
+      // print("Status => ${segment.stcwDayResult}");
+      // print(
+      //   "Before Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount",
+      // );
 
       if (segment.stcwDayResult == StcwDayResult.actual_sea) {
-
         if (standbyCount != 0 || unknownCount != 0) {
-          print("Resetting counters due to new SEA block");
-
           standbyCount = 0;
           unknownCount = 0;
+          yardCount = 0;
+          errorMessage = "";
           seaCount = 1;
         } else {
           seaCount++;
         }
-        lastDay = StcwDayResult.actual_sea;
         countedDay = true;
-      }
-
-      else if (segment.stcwDayResult == StcwDayResult.stand_by) {
-
+      } else if (segment.stcwDayResult == StcwDayResult.stand_by) {
         if (seaCount > standbyCount) {
           standbyCount++;
           countedDay = true;
-          print("Standby counted (within sea balance)");
-        }
-
-        else if (seaCount <= standbyCount && standbyCount < 14) {
+          //print("Standby counted (within sea balance)");
+        } else if (seaCount <= standbyCount && standbyCount <= 14) {
           standbyCount++;
           countedDay = false;
-          print("Standby exists but exceeds sea balance");
-        }
-
-        else if (standbyCount > seaCount && standbyCount > 14) {
+          // print("Standby exists but exceeds sea balance");
+        } else if (standbyCount > seaCount && standbyCount > 14) {
           standbyCount++;
           countedDay = false;
           errorMessage = "Exceeds 14-day standby cap";
-          print("ERROR => $errorMessage");
+          //print("ERROR => $errorMessage");
         }
-        lastDay = StcwDayResult.stand_by;
-      }
-
-      else if (segment.stcwDayResult == StcwDayResult.yard) {
-        countedDay = true;
-        lastDay = StcwDayResult.yard;
-        print("Yard Day => Always Counted");
-      }
-
-      else if (segment.stcwDayResult == StcwDayResult.unknown) {
-
-        if (seaCount > unknownCount && countedDay==true && seaCount>standbyCount) {
+        // lastDay = StcwDayResult.stand_by;
+      } else if (segment.stcwDayResult == StcwDayResult.yard) {
+        if (90 > yardCount) {
+          yardCount++;
+          countedDay = true;
+          // print("Yard counted (within sea balance)");
+        } else {
+          yardCount++;
+          countedDay = false;
+          // errorMessage = "Exceeds Limit  yard Day  cap";
+          // print("ERROR => $errorMessage");
+          // print("Yard exists but exceeds sea balance");
+        }
+        // lastDay = StcwDayResult.yard;
+        // print("Yard Day => Always Counted");
+      } else if (segment.stcwDayResult == StcwDayResult.unknown) {
+        if (seaCount > unknownCount &&
+            countedDay == true &&
+            seaCount > standbyCount) {
           unknownCount++;
           standbyCount++;
           countedDay = true;
-          print("Unknown counted within sea balance");
+          // print("Unknown counted within sea balance");
         } else {
           unknownCount++;
           countedDay = false;
-          print("Unknown NOT counted");
+          errorMessage = "";
+          // print("Unknown NOT counted");
         }
-        lastDay= StcwDayResult.unknown;
+        // lastDay= StcwDayResult.unknown;
       }
 
-      print("After Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount");
-      print("Counted Decision => $countedDay");
+      // print(
+      //   "After Count => SEA:$seaCount | STANDBY:$standbyCount | UNKNOWN:$unknownCount | YARD:$yardCount | ERROR:$errorMessage",
+      // );
+      // print("Counted Decision => $countedDay");
 
       // 🔥 Target Day Found
       if (segment.date == daySegment.date) {
-
         final data = DaySegment(
           date: daySegment.date,
           status: daySegment.status,
@@ -237,18 +235,19 @@ class AISClassifier {
           stcwDayResult: daySegment.stcwDayResult,
           isCountedDay: countedDay,
           showError: errorMessage,
+          confirm: false,
         );
 
-        print("\n***** FINAL RESULT FOR TARGET DAY *****");
-        print(data.toJson());
-        print("================ STCW COUNT DEBUG END ================\n");
+        // print("\n***** FINAL RESULT FOR TARGET DAY *****");
+        // print(data.toJson());
+        // print("================ STCW COUNT DEBUG END ================\n");
 
         return data;
       }
     }
 
-    print("Target day not found in segment list");
-    print("================ STCW COUNT DEBUG END ================\n");
+    // print("Target day not found in segment list");
+    // print("================ STCW COUNT DEBUG END ================\n");
 
     return DaySegment(
       date: daySegment.date,
@@ -258,7 +257,7 @@ class AISClassifier {
       stcwDayResult: daySegment.stcwDayResult,
       isCountedDay: daySegment.isCountedDay,
       showError: daySegment.showError,
+      confirm: false,
     );
   }
-
 }

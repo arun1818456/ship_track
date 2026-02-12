@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
+import 'package:ship_track_flutter/app/models/saved_local_data_model.dart';
 import '../../../exports.dart';
 import '../../models/day_segment_model.dart';
 import '../../models/stcw_model.dart';
@@ -19,18 +20,12 @@ class DetailsController extends GetxController with BaseClass {
   bool isLoading = true;
   RxBool showScrollToTop = false.obs;
 
-  List storedDataList = [
-    {
-      "vessel": {"name": "NITA K II", "IMO": "1007940", "MMSI": "339435000"},
-      "date": DateTime.now(),
-      "status": StcwDayResult.stand_by,
-    },
-  ];
+  List<LocalSavedDataModel> localSavedList = [];
 
   @override
   void onInit() {
     super.onInit();
-
+    _loadSavedData();
     final data = Get.arguments;
     selectedVessel = data['selectedVessel'];
     signOnDate = dateFormatter.parse(data['signOnDate']);
@@ -41,6 +36,21 @@ class DetailsController extends GetxController with BaseClass {
     scrollController.addListener(() {
       showScrollToTop.value = scrollController.offset > 300;
     });
+  }
+
+  // ---------------- LOCAL STORAGE ----------------
+
+  void _loadSavedData() {
+    final List<dynamic>? storedData = storage.read(LocalKeys.storedAis);
+    if (storedData != null) {
+      localSavedList = storedData
+          .map(
+            (item) =>
+                LocalSavedDataModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+      update();
+    }
   }
 
   @override
@@ -90,16 +100,6 @@ class DetailsController extends GetxController with BaseClass {
         /// 🔹 Small delay to avoid rate-limit
         await Future.delayed(const Duration(milliseconds: 400));
       }
-      /////-------------------------
-      // historicalModelData = HistoricalModelData.fromJson(dataApi);
-      // aisPoints =
-      //     historicalModelData.data?.positions!
-      //         .map((p) => Positions.fromJson(p.toJson()))
-      //         .toList() ??
-      //     [];
-
-      ////-------------------test data for testing
-
       aisPoints.sort(
         (a, b) =>
             a.lastPositionUTC!.compareTo(b.lastPositionUTC ?? DateTime.now()),
@@ -153,31 +153,239 @@ class DetailsController extends GetxController with BaseClass {
   }
 
   setCalculateStcwRule() async {
-
     final segments = calendarDayCalculation?.segments ?? [];
 
     for (int i = 0; i < segments.length; i++) {
-
       DaySegment element = segments[i];
 
       // 🔹 1. Replace stored data
-      for (var data in storedDataList) {
-        if (data["vessel"]["IMO"] == selectedVessel?["IMO"] &&
-            element.date == data["date"]) {
-
-          element.stcwDayResult = data["status"];
+      for (var data in localSavedList) {
+        if (data.vesselIMO == selectedVessel?["IMO"] &&
+            element.date == data.date) {
+          element.stcwDayResult = data.status!;
+          element.confirm=data.confirm??false;
         }
       }
 
       // 🔹 2. Apply countable rule
-      DaySegment updatedSegment =
-      AISClassifier().countAbleDays(segments, element);
+      DaySegment updatedSegment = AISClassifier().countAbleDays(
+        segments,
+        element,
+      );
 
       // 🔹 3. IMPORTANT → update list item
       segments[i] = updatedSegment;
     }
-
+    calculateTotals();
     update();
   }
 
+  void editTap(BuildContext context, selectedSegment) {
+    StcwDayResult? selectedValue;
+    selectedValue = selectedSegment.stcwDayResult;
+    DateTime selectedDate = selectedSegment.date;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              backgroundColor: AppColor.white,
+              title: Text("Select Service Type"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<StcwDayResult>(
+                    title: Text("Stand by day"),
+                    value: StcwDayResult.stand_by,
+                    groupValue: selectedValue,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<StcwDayResult>(
+                    title: Text("Yard day"),
+                    value: StcwDayResult.yard,
+                    groupValue: selectedValue,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<StcwDayResult>(
+                    title: Text("Actual sea day"),
+                    value: StcwDayResult.actual_sea,
+                    groupValue: selectedValue,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomButton(
+                        textColor: AppColor.appColor,
+                        color: AppColor.transparent,
+                        isBorderEnable: true,
+                        borderColor: AppColor.appColor,
+                        text: "Cancel",
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: CustomButton(
+                        onPressed: () {
+                          Get.back();
+                          onChangedService(selectedValue!, selectedDate);
+                        },
+
+                        text: "Save",
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  // on  service Status changes
+
+  onChangedService(StcwDayResult selectedValue, DateTime selectedDate) {
+    final String? imo = selectedVessel?["IMO"];
+
+    int index = localSavedList.indexWhere(
+      (element) => element.vesselIMO == imo && element.date == selectedDate,
+    );
+
+    if (index != -1) {
+      // ✅ Replace existing status
+      localSavedList[index].status = selectedValue;
+    } else {
+      // ✅ Add new entry
+      localSavedList.add(
+        LocalSavedDataModel(
+          vesselIMO: imo,
+          date: selectedDate,
+          status: selectedValue,
+        ),
+      );
+    }
+
+    // Save updated list to storage
+    storage.write(
+      LocalKeys.storedAis,
+      localSavedList.map((e) => e.toJson()).toList(),
+    );
+
+    // Recalculate STCW totals
+    setCalculateStcwRule();
+
+    // Now close the dialog
+  }
+
+  //////
+  void calculateTotals() {
+    int totalCountableDay = 0;
+    int totalUnCountableDay = 0;
+    int totalActualSeaDays = 0;
+    int totalStandByDays = 0;
+    int totalYardDays = 0;
+    int totalUnknownDays = 0;
+
+    final segments = calendarDayCalculation?.segments ?? [];
+
+    for (var segment in segments) {
+      if (segment.isCountedDay == true) {
+        totalCountableDay++;
+      } else {
+        totalUnCountableDay++;
+      }
+
+      switch (segment.stcwDayResult) {
+        case StcwDayResult.actual_sea:
+          totalActualSeaDays++;
+          break;
+        case StcwDayResult.stand_by:
+          totalStandByDays++;
+          break;
+        case StcwDayResult.yard:
+          totalYardDays++;
+          break;
+        case StcwDayResult.unknown:
+          totalUnknownDays++;
+          break;
+      }
+    }
+
+    calendarDayCalculation = CalendarDaysResult(
+      totalCalendarDays: calendarDayCalculation!.totalCalendarDays,
+      totalAtSeaDays: calendarDayCalculation!.totalAtSeaDays,
+      totalInPortDays: calendarDayCalculation!.totalInPortDays,
+      segments: calendarDayCalculation!.segments,
+      totalActualSeaDays: totalActualSeaDays,
+      totalStandByDays: totalStandByDays,
+      totalYardDays: totalYardDays,
+      totalUnknownDays: totalUnknownDays,
+      totalCountableDay: totalCountableDay,
+      totalUnCountableDay: totalUnCountableDay,
+    );
+  }
+
+  ////// conformation  Actual sea Day Service
+  onTapYes(DaySegment daySegment) async {
+    final String? imo = selectedVessel?["IMO"];
+
+    /// 1️⃣ Update only that segment (NO update() inside loop)
+    final segments = calendarDayCalculation?.segments ?? [];
+
+    for (var element in segments) {
+      if (element.date == daySegment.date) {
+        print(">>>>> next ");
+        element.confirm = true;
+        break;
+      }
+    }
+
+
+    /// 2️⃣ Update local storage list
+    int index = localSavedList.indexWhere(
+      (element) => element.vesselIMO == imo && element.date == daySegment.date,
+    );
+    print(">>>>>>${index}");
+    if (index != -1) {
+      localSavedList[index].confirm = true;
+    } else {
+      localSavedList.add(
+        LocalSavedDataModel(
+          vesselIMO: imo,
+          date: daySegment.date,
+          status: daySegment.stcwDayResult,
+          confirm: true,
+        ),
+      );
+    }
+
+    /// 3️⃣ Save storage (this is sync, keep once)
+    storage.write(
+      LocalKeys.storedAis,
+      localSavedList.map((e) => e.toJson()).toList(),
+    );
+    setCalculateStcwRule();
+    update();
+  }
 }

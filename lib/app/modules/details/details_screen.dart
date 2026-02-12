@@ -203,15 +203,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
               Colors.orange,
               context,
             ),
-            // const Divider(),
-            // _buildStatRow(
-            //   'Yard Days',
-            //   (controller.calendarDayCalculation?.totalYardDays ?? 0)
-            //       .toString(),
-            //   Icons.construction,
-            //   Colors.brown,
-            //   context,
-            // ),
+            const Divider(),
+            _buildStatRow(
+              'Yard Days',
+              (controller.calendarDayCalculation?.totalYardDays ?? 0)
+                  .toString(),
+              Icons.construction,
+              Colors.brown,
+              context,
+            ),
             const Divider(),
             _buildStatRow(
               'Unknown Days',
@@ -221,14 +221,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
               Colors.grey,
               context,
             ),
-            // const Divider(thickness: 1.2),
-            // _buildStatRow(
-            //   'Total Countable',
-            //   "--",
-            //   Icons.check_circle,
-            //   Colors.green,
-            //   context,
-            // ),
+            const Divider(thickness: 1.2),
+            _buildStatRow(
+              'Total Countable',
+              (controller.calendarDayCalculation?.totalCountableDay ?? 0)
+                  .toString(),
+              Icons.check_circle,
+              Colors.green,
+              context,
+            ),
+            const Divider(thickness: 1.2),
+            _buildStatRow(
+              'Un- Countable',
+              (controller.calendarDayCalculation?.totalUnCountableDay ?? 0)
+                  .toString(),
+              Icons.block,
+              Colors.red,
+              context,
+            ),
           ],
         ),
       ),
@@ -416,7 +426,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 itemBuilder: (context, index) {
                   final segment =
                       controller.calendarDayCalculation?.segments[index];
-                  final isAtSea = segment?.status == VesselStatus.atSea;
+                  // final isAtSea = segment?.status == VesselStatus.atSea;
 
                   return GestureDetector(
                     onTap: () {
@@ -440,7 +450,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color:  getColor(
+                          color: getColor(
                             controller
                                 .calendarDayCalculation!
                                 .segments[index]
@@ -457,19 +467,29 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: isAtSea
-                                      ? Colors.blue[100]
-                                      : Colors.green[100],
+                                  color: getColor(
+                                    controller
+                                        .calendarDayCalculation!
+                                        .segments[index]
+                                        .stcwDayResult,
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Icon(
                                   controller
-                                      .calendarDayCalculation!
-                                      .segments[index]
-                                      .stcwDayResult==StcwDayResult.actual_sea
+                                              .calendarDayCalculation!
+                                              .segments[index]
+                                              .stcwDayResult ==
+                                          StcwDayResult.actual_sea
                                       ? Icons.directions_boat
-                                      : Icons.anchor,
-                                  color:  getColor(
+                                      : controller
+                                                .calendarDayCalculation!
+                                                .segments[index]
+                                                .stcwDayResult ==
+                                            StcwDayResult.stand_by
+                                      ? Icons.anchor
+                                      : Icons.help_outline,
+                                  color: getColor(
                                     controller
                                         .calendarDayCalculation!
                                         .segments[index]
@@ -497,14 +517,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        // border: Border.all(
-                                        //   color: getColor(
-                                        //     controller
-                                        //         .calendarDayCalculation!
-                                        //         .segments[index]
-                                        //         .stcwDayResult,
-                                        //   ),
-                                        // ),
                                         color: getColor(
                                           controller
                                               .calendarDayCalculation!
@@ -513,20 +525,100 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ).withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Text(
-                                        "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString() ?? ""}",
-                                        style: TextStyle(
-                                          color: getColor(
-                                            controller
-                                                .calendarDayCalculation!
-                                                .segments[index]
-                                                .stcwDayResult,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (controller
+                                                  .calendarDayCalculation
+                                                  ?.segments[index]
+                                                  .confirm ??
+                                              false)
+                                            Icon(
+                                              Icons.circle,
+                                              size: 6,
+                                              color: AppColor.appColor,
+                                            ),
+                                          SizedBox(width: 5,),
+                                          Text(
+                                            "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString().replaceAll("_", " ").capitalizeFirst ?? ""}",
+                                            style: TextStyle(
+                                              color: getColor(
+                                                controller
+                                                    .calendarDayCalculation!
+                                                    .segments[index]
+                                                    .stcwDayResult,
+                                              ),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        ],
                                       ),
                                     ),
+
+                                    // if (controller
+                                    //             .calendarDayCalculation
+                                    //             ?.segments[index]
+                                    //             .stcwDayResult ==
+                                    //         StcwDayResult.actual_sea &&
+                                    //     (controller
+                                    //                 .calendarDayCalculation
+                                    //                 ?.segments[index]
+                                    //                 .confirm ??
+                                    //             false) ==
+                                    //         false) ...[
+                                    //   const SizedBox(height: 5),
+                                    //   Text(
+                                    //     "where you watch this day ? ",
+                                    //     style: TextStyle(
+                                    //       color: AppColor.appColor,
+                                    //       fontSize: 12,
+                                    //     ),
+                                    //   ),
+                                    //   const SizedBox(height: 5),
+                                    //   SizedBox(
+                                    //     width: Get.width / 2,
+                                    //     child: Row(
+                                    //       children: [
+                                    //         CustomButton(
+                                    //           width: 70,
+                                    //           buttonHeight: 20,
+                                    //           radius: 4,
+                                    //           text: "Yes",
+                                    //           onPressed: () {
+                                    //             controller.onTapYes(
+                                    //               controller
+                                    //                   .calendarDayCalculation!
+                                    //                   .segments[index],
+                                    //             );
+                                    //           },
+                                    //           fontSize: 11,
+                                    //         ),
+                                    //         SizedBox(width: 5),
+                                    //         CustomButton(
+                                    //           width: 70,
+                                    //           buttonHeight: 20,
+                                    //           radius: 4,
+                                    //           text: "No",
+                                    //           isBorderEnable: true,
+                                    //           color: AppColor.transparent,
+                                    //           textColor: AppColor.appColor,
+                                    //           borderColor: AppColor.appColor,
+                                    //           fontSize: 11,
+                                    //           onPressed: () {
+                                    //             controller.editTap(
+                                    //               context,
+                                    //               controller
+                                    //                   .calendarDayCalculation!
+                                    //                   .segments[index],
+                                    //             );
+                                    //           },
+                                    //         ),
+                                    //       ],
+                                    //     ),
+                                    //   ),
+                                    // ],
+
                                     // Wrap(
                                     //   runSpacing: 5,
                                     //   children: [
@@ -613,7 +705,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color:  getColor(
+                                        color: getColor(
                                           controller
                                               .calendarDayCalculation!
                                               .segments[index]
@@ -649,8 +741,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         .calendarDayCalculation!
                                         .segments[index]
                                         .isCountedDay)
-                                    ? "CountAble"
-                                    : 'non-countable',
+                                    ? "Countable"
+                                    : 'Non-countable',
                                 style: TextStyle(
                                   color:
                                       controller
@@ -662,14 +754,81 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Text("Add Yard day"),
-                                  Icon(Icons.keyboard_arrow_down, size: 12)
-                                ],
+                              GestureDetector(
+                                onTap: () {
+                                  controller.editTap(
+                                    context,
+                                    controller
+                                        .calendarDayCalculation!
+                                        .segments[index],
+                                  );
+                                  // DateTimeRange? pickedDateRange =
+                                  //     await showDateRangePicker(
+                                  //       context: context,
+                                  //       initialEntryMode:
+                                  //           DatePickerEntryMode.input,
+                                  //       firstDate: DateTime(2000),
+                                  //       lastDate: DateTime.now().subtract(
+                                  //         Duration(days: 1),
+                                  //       ),
+                                  //       initialDateRange: DateTimeRange(
+                                  //         start: DateTime.now().subtract(
+                                  //           Duration(days: 30),
+                                  //         ),
+                                  //         end: DateTime.now().subtract(
+                                  //           Duration(days: 2),
+                                  //         ),
+                                  //       ),
+                                  //     );
+                                  //
+                                  // if (pickedDateRange != null) {
+                                  //   final int totalDays =
+                                  //       pickedDateRange.end
+                                  //           .difference(pickedDateRange.start)
+                                  //           .inDays +
+                                  //       1;
+                                  //
+                                  //   if (totalDays > 90) {
+                                  //     ScaffoldMessenger.of(
+                                  //       context,
+                                  //     ).showSnackBar(
+                                  //       SnackBar(
+                                  //         content: Text(
+                                  //           "You cannot select more than 90 days.",
+                                  //         ),
+                                  //         backgroundColor: Colors.red,
+                                  //       ),
+                                  //     );
+                                  //     return;
+                                  //   }
+                                  //
+                                  //   // ✅ Valid range (≤ 90 days)
+                                  //   print("Valid range: $totalDays days");
+                                  // }
+                                },
+
+                                child: Container(
+                                  padding: EdgeInsets.all(5),
+                                  color: AppColor.transparent,
+                                  child: Row(
+                                    children: [
+                                      Text("Edit "),
+                                      Icon(Icons.edit, size: 12),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
+                          if (controller
+                              .calendarDayCalculation!
+                              .segments[index]
+                              .showError
+                              .isNotEmpty)
+                            Text(
+                              "Waring:-${controller.calendarDayCalculation?.segments[index].showError}",
+                              style: TextStyle(fontSize: 12, color: Colors.red),
+                            ),
                         ],
                       ),
                     ),
@@ -732,7 +891,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       case StcwDayResult.stand_by:
         return Colors.green;
       case StcwDayResult.yard:
-        return Colors.brown;
+        return Colors.orange;
       case StcwDayResult.unknown:
         return Colors.grey;
     }

@@ -21,6 +21,8 @@ class CalendarDayCalculator {
         totalStandByDays: 0,
         totalYardDays: 0,
         totalUnknownDays: 0,
+        totalCountableDay: 0,
+        totalUnCountableDay: 0,
       );
     }
 
@@ -59,10 +61,6 @@ class CalendarDayCalculator {
     // -------------------------------
     int atSeaDays = 0;
     int inPortDays = 0;
-    int actualSeaDays = 0;
-    int standByDays = 0;
-    int yardDays = 0;
-    int unknownDays = 0;
 
     final List<DaySegment> segments = [];
 
@@ -76,7 +74,6 @@ class CalendarDayCalculator {
       final dayPoints = pointsByDay[day] ?? [];
 
       bool isAtSea = false;
-
 
       if (dayPoints.isNotEmpty) {
         final classifications = dayPoints
@@ -95,27 +92,16 @@ class CalendarDayCalculator {
       DayReasonCode reasonCode = AISClassifier.getReasonCode(dayPoints);
       StcwDayResult stcwDayResult = AISClassifier.stcwCalculations(dayPoints);
 
-      if (stcwDayResult == StcwDayResult.actual_sea) {
-        actualSeaDays++;
-      } else if (stcwDayResult == StcwDayResult.stand_by) {
-        standByDays++;
-      } else if (stcwDayResult == StcwDayResult.yard) {
-        yardDays++;
-      } else if (stcwDayResult == StcwDayResult.unknown) {
-        unknownDays++;
-      }
-
       segments.add(
         DaySegment(
           date: day,
-          status: isAtSea
-              ? VesselStatus.atSea
-              : VesselStatus.inPort,
+          status: isAtSea ? VesselStatus.atSea : VesselStatus.inPort,
           pointCount: dayPoints.length,
           reasonCode: reasonCode,
           stcwDayResult: stcwDayResult,
           isCountedDay: false,
           showError: "",
+          confirm: false
         ),
       );
     }
@@ -125,10 +111,12 @@ class CalendarDayCalculator {
       totalAtSeaDays: atSeaDays,
       totalInPortDays: inPortDays,
       segments: segments,
-      totalActualSeaDays: actualSeaDays,
-      totalStandByDays: standByDays,
-      totalYardDays: yardDays,
-      totalUnknownDays: unknownDays,
+      totalActualSeaDays: 0,
+      totalStandByDays: 0,
+      totalYardDays: 0,
+      totalUnknownDays: 0,
+      totalCountableDay: 0,
+      totalUnCountableDay: 0,
     );
   }
 }

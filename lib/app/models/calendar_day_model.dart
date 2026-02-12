@@ -8,6 +8,8 @@ class CalendarDaysResult {
   final int totalStandByDays;
   final int totalYardDays;
   final int totalUnknownDays;
+  final int totalCountableDay;
+  final int totalUnCountableDay;
   final List<DaySegment> segments;
 
   CalendarDaysResult({
@@ -19,6 +21,8 @@ class CalendarDaysResult {
     required this.totalStandByDays,
     required this.totalYardDays,
     required this.totalUnknownDays,
+    required this.totalCountableDay,
+    required this.totalUnCountableDay,
   });
 
   Map<String, dynamic> toJson() {
@@ -31,6 +35,8 @@ class CalendarDaysResult {
       'total_stand_by_days': totalStandByDays,
       'total_yard_days': totalYardDays,
       'total_unknown_days': totalUnknownDays,
+      'total_countable_day': totalCountableDay,
+      'total_un_countable_day': totalUnCountableDay,
     };
   }
 }

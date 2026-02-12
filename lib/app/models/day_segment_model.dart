@@ -7,6 +7,7 @@ class DaySegment {
    DayReasonCode reasonCode;
    StcwDayResult stcwDayResult;
    bool isCountedDay;
+   bool confirm;
    String showError;
 
   DaySegment({
@@ -17,6 +18,7 @@ class DaySegment {
     required this.stcwDayResult,
     required this.isCountedDay,
     required this.showError,
+    required this.confirm,
   });
 
   Map<String, dynamic> toJson() {
@@ -28,6 +30,7 @@ class DaySegment {
       'stcw_day_result': stcwDayResult,
       'is_counted_day': isCountedDay,
       'show_error': showError,
+      'confirm': confirm,
     };
   }
 }
