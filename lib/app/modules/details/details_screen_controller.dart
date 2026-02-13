@@ -250,7 +250,6 @@ class DetailsController extends GetxController with BaseClass {
                           Get.back();
                           onChangedService(selectedValue!, selectedDate);
                         },
-
                         text: "Save",
                       ),
                     ),
@@ -355,10 +354,10 @@ class DetailsController extends GetxController with BaseClass {
 
     for (var element in segments) {
       if (element.date == daySegment.date) {
-        print(">>>>> next ");
         element.confirm = true;
         break;
       }
+      update();
     }
 
 
@@ -366,7 +365,6 @@ class DetailsController extends GetxController with BaseClass {
     int index = localSavedList.indexWhere(
       (element) => element.vesselIMO == imo && element.date == daySegment.date,
     );
-    print(">>>>>>${index}");
     if (index != -1) {
       localSavedList[index].confirm = true;
     } else {
@@ -385,7 +383,6 @@ class DetailsController extends GetxController with BaseClass {
       LocalKeys.storedAis,
       localSavedList.map((e) => e.toJson()).toList(),
     );
-    setCalculateStcwRule();
     update();
   }
 }

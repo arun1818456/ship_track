@@ -139,7 +139,7 @@ class SegmentDetailsScreen extends StatelessWidget {
                               controller
                                   .getReasonCodeByIndex(index)
                                   .name
-                                  .toString(),
+                                  .toString().replaceAll("_", " "),
                               background: true,
                             ),
                           ],

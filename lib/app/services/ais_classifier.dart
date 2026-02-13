@@ -192,6 +192,7 @@ class AISClassifier {
       } else if (segment.stcwDayResult == StcwDayResult.yard) {
         if (90 > yardCount) {
           yardCount++;
+          standbyCount++;
           countedDay = true;
           // print("Yard counted (within sea balance)");
         } else {
@@ -235,7 +236,7 @@ class AISClassifier {
           stcwDayResult: daySegment.stcwDayResult,
           isCountedDay: countedDay,
           showError: errorMessage,
-          confirm: false,
+          confirm: daySegment.confirm,
         );
 
         // print("\n***** FINAL RESULT FOR TARGET DAY *****");

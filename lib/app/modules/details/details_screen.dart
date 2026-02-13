@@ -29,14 +29,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
             ),
             centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: () {
-                  controller.setCalculateStcwRule();
-                },
-                icon: Icon(Icons.stacked_bar_chart),
-              ),
-            ],
+            // actions: [
+            //   IconButton(
+            //     onPressed: () {
+            //       controller.setCalculateStcwRule();
+            //     },
+            //     icon: Icon(Icons.stacked_bar_chart),
+            //   ),
+            // ],
           ),
 
           // Main body
@@ -75,6 +75,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                "${controller.selectedVessel?["name"] ?? ""} (${controller.selectedVessel?["IMO"] ?? ""})",
+                                style: TextStyle(fontSize: 16),
                               ),
                               const SizedBox(height: 12),
                               _buildStatRow(
@@ -232,7 +237,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ),
             const Divider(thickness: 1.2),
             _buildStatRow(
-              'Un- Countable',
+              'Non-Countable',
               (controller.calendarDayCalculation?.totalUnCountableDay ?? 0)
                   .toString(),
               Icons.block,
@@ -536,9 +541,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             Icon(
                                               Icons.circle,
                                               size: 6,
-                                              color: AppColor.appColor,
+                                              color:  Colors.green,
                                             ),
-                                          SizedBox(width: 5,),
+                                          SizedBox(width: 5),
                                           Text(
                                             "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString().replaceAll("_", " ").capitalizeFirst ?? ""}",
                                             style: TextStyle(
@@ -556,68 +561,69 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       ),
                                     ),
 
-                                    // if (controller
-                                    //             .calendarDayCalculation
-                                    //             ?.segments[index]
-                                    //             .stcwDayResult ==
-                                    //         StcwDayResult.actual_sea &&
-                                    //     (controller
-                                    //                 .calendarDayCalculation
-                                    //                 ?.segments[index]
-                                    //                 .confirm ??
-                                    //             false) ==
-                                    //         false) ...[
-                                    //   const SizedBox(height: 5),
-                                    //   Text(
-                                    //     "where you watch this day ? ",
-                                    //     style: TextStyle(
-                                    //       color: AppColor.appColor,
-                                    //       fontSize: 12,
-                                    //     ),
-                                    //   ),
-                                    //   const SizedBox(height: 5),
-                                    //   SizedBox(
-                                    //     width: Get.width / 2,
-                                    //     child: Row(
-                                    //       children: [
-                                    //         CustomButton(
-                                    //           width: 70,
-                                    //           buttonHeight: 20,
-                                    //           radius: 4,
-                                    //           text: "Yes",
-                                    //           onPressed: () {
-                                    //             controller.onTapYes(
-                                    //               controller
-                                    //                   .calendarDayCalculation!
-                                    //                   .segments[index],
-                                    //             );
-                                    //           },
-                                    //           fontSize: 11,
-                                    //         ),
-                                    //         SizedBox(width: 5),
-                                    //         CustomButton(
-                                    //           width: 70,
-                                    //           buttonHeight: 20,
-                                    //           radius: 4,
-                                    //           text: "No",
-                                    //           isBorderEnable: true,
-                                    //           color: AppColor.transparent,
-                                    //           textColor: AppColor.appColor,
-                                    //           borderColor: AppColor.appColor,
-                                    //           fontSize: 11,
-                                    //           onPressed: () {
-                                    //             controller.editTap(
-                                    //               context,
-                                    //               controller
-                                    //                   .calendarDayCalculation!
-                                    //                   .segments[index],
-                                    //             );
-                                    //           },
-                                    //         ),
-                                    //       ],
-                                    //     ),
-                                    //   ),
-                                    // ],
+                                    if (controller
+                                                .calendarDayCalculation
+                                                ?.segments[index]
+                                                .stcwDayResult ==
+                                            StcwDayResult.actual_sea &&
+                                        (controller
+                                                    .calendarDayCalculation
+                                                    ?.segments[index]
+                                                    .confirm ??
+                                                false) ==
+                                            false) ...[
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        "where you watch this day ? ",
+                                        style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      SizedBox(
+                                        width: Get.width / 2,
+                                        child: Row(
+                                          children: [
+                                            CustomButton(
+                                              width: 70,
+                                              color: Colors.green,
+                                              buttonHeight: 20,
+                                              radius: 4,
+                                              text: "Yes",
+                                              onPressed: () {
+                                                controller.onTapYes(
+                                                  controller
+                                                      .calendarDayCalculation!
+                                                      .segments[index],
+                                                );
+                                              },
+                                              fontSize: 11,
+                                            ),
+                                            SizedBox(width: 5),
+                                            CustomButton(
+                                              width: 70,
+                                              buttonHeight: 20,
+                                              radius: 4,
+                                              text: "No",
+                                              isBorderEnable: true,
+                                              color: AppColor.transparent,
+                                              textColor:  Colors.green,
+                                              borderColor:  Colors.green,
+                                              fontSize: 11,
+                                              onPressed: () {
+                                                controller.editTap(
+                                                  context,
+                                                  controller
+                                                      .calendarDayCalculation!
+                                                      .segments[index],
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
 
                                     // Wrap(
                                     //   runSpacing: 5,
@@ -887,9 +893,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
   Color getColor(StcwDayResult stcwCalculations) {
     switch (stcwCalculations) {
       case StcwDayResult.actual_sea:
-        return Colors.blue;
-      case StcwDayResult.stand_by:
         return Colors.green;
+      case StcwDayResult.stand_by:
+        return Colors.blue;
       case StcwDayResult.yard:
         return Colors.orange;
       case StcwDayResult.unknown:
