@@ -1,6 +1,7 @@
 import 'package:ship_track_flutter/app/models/calendar_day_model.dart';
 import 'package:ship_track_flutter/app/models/day_segment_model.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
+
 import '../constant/enums.dart';
 import '../services/ais_classifier.dart';
 
@@ -90,7 +91,9 @@ class CalendarDayCalculator {
 
       /////check reason code for day
       DayReasonCode reasonCode = AISClassifier.getReasonCode(dayPoints);
-      StcwDayResult stcwDayResult = AISClassifier.stcwCalculations(dayPoints);
+      AISClassifierResult aisClassifierResult = AISClassifier.stcwCalculations(
+        dayPoints,
+      );
 
       segments.add(
         DaySegment(
@@ -98,10 +101,11 @@ class CalendarDayCalculator {
           status: isAtSea ? VesselStatus.atSea : VesselStatus.inPort,
           pointCount: dayPoints.length,
           reasonCode: reasonCode,
-          stcwDayResult: stcwDayResult,
+          stcwDayResult: aisClassifierResult.stcwDayResult,
+          atSeaDuration: aisClassifierResult.atSeaDuration,
           isCountedDay: false,
           showError: "",
-          confirm: false
+          confirm: false,
         ),
       );
     }

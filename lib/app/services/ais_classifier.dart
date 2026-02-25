@@ -86,38 +86,43 @@ class AISClassifier {
 
   ///  Calculations of STCW Data
 
-  static StcwDayResult stcwCalculations(List<Positions> classifications) {
-    // 2️⃣ No data → UNKNOWN
-    if (classifications.isEmpty) return StcwDayResult.unknown;
-
-    // 3️⃣ Calculate total "at sea" duration (speed > 2 knots)
-    classifications.sort(
-      (a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC!),
-    );
-
+  static AISClassifierResult stcwCalculations(List<Positions> classifications) {
     Duration atSeaDuration = Duration.zero;
+    StcwDayResult stcwDayResult = StcwDayResult.unknown;
 
-    for (int i = 0; i < classifications.length - 1; i++) {
-      final curr = classifications[i];
-      final next = classifications[i + 1];
+    // 2️⃣ No data → UNKNOWN
+    if (classifications.isNotEmpty) {
+      // 3️⃣ Calculate total "at sea" duration (speed > 2 knots)
+      classifications.sort(
+        (a, b) => a.lastPositionUTC!.compareTo(b.lastPositionUTC!),
+      );
 
-      if (curr.lastPositionUTC == null || next.lastPositionUTC == null) {
-        continue;
+      /// ✅ Check ANY entry speed > threshold
+      if (classifications.any((e) => (e.speed ?? 0) > 2.0)) {
+        stcwDayResult = StcwDayResult.actual_sea;
       }
 
-      final diff = next.lastPositionUTC!.difference(curr.lastPositionUTC!);
+      /// Duration calculation
+      for (int i = 0; i < classifications.length - 1; i++) {
+        final curr = classifications[i];
+        final next = classifications[i + 1];
 
-      if ((curr.speed ?? 0) > 2.0) {
-        atSeaDuration += diff;
+        if (curr.lastPositionUTC == null || next.lastPositionUTC == null) {
+          continue;
+        }
+
+        final diff = next.lastPositionUTC!.difference(curr.lastPositionUTC!);
+
+        if ((curr.speed ?? 0) > 2.0) {
+          atSeaDuration += diff;
+        }
       }
     }
 
-    // 4️⃣ Assign status based on 4-hour rule
-    if (atSeaDuration.inHours >= 4) {
-      return StcwDayResult.actual_sea;
-    } else {
-      return StcwDayResult.stand_by;
-    }
+    return AISClassifierResult(
+      stcwDayResult: stcwDayResult,
+      atSeaDuration: atSeaDuration,
+    );
   }
 
   /// ///// material for  Classifications
@@ -234,6 +239,7 @@ class AISClassifier {
           pointCount: daySegment.pointCount,
           reasonCode: daySegment.reasonCode,
           stcwDayResult: daySegment.stcwDayResult,
+          atSeaDuration: daySegment.atSeaDuration,
           isCountedDay: countedDay,
           showError: errorMessage,
           confirm: daySegment.confirm,
@@ -256,9 +262,20 @@ class AISClassifier {
       pointCount: daySegment.pointCount,
       reasonCode: daySegment.reasonCode,
       stcwDayResult: daySegment.stcwDayResult,
+      atSeaDuration: daySegment.atSeaDuration,
       isCountedDay: daySegment.isCountedDay,
       showError: daySegment.showError,
       confirm: false,
     );
   }
+}
+
+class AISClassifierResult {
+  StcwDayResult stcwDayResult;
+  Duration atSeaDuration;
+
+  AISClassifierResult({
+    required this.stcwDayResult,
+    required this.atSeaDuration,
+  });
 }

@@ -1,3 +1,5 @@
+import 'package:ship_track_flutter/app/models/day_segment_model.dart';
+
 import '../../../exports.dart';
 
 /// DetailsScreen shows AIS track data, STCW summary, and day segments.
@@ -429,10 +431,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     controller.calendarDayCalculation?.segments.length ?? 0,
                 separatorBuilder: (context, index) => const SizedBox(height: 6),
                 itemBuilder: (context, index) {
-                  final segment =
-                      controller.calendarDayCalculation?.segments[index];
-                  // final isAtSea = segment?.status == VesselStatus.atSea;
-
+                  DaySegment? segment = controller.calendarDayCalculation?.segments[index];
                   return GestureDetector(
                     onTap: () {
                       Get.toNamed(
@@ -446,20 +445,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        // color: isAtSea ? Colors.blue[50] : Colors.green[50],
                         color: getColor(
-                          controller
-                              .calendarDayCalculation!
-                              .segments[index]
-                              .stcwDayResult,
+                          segment!.stcwDayResult,
                         ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: getColor(
-                            controller
-                                .calendarDayCalculation!
-                                .segments[index]
-                                .stcwDayResult,
+                            segment.stcwDayResult,
                           ).withValues(alpha: 0.2),
                           width: 1,
                         ),
@@ -473,33 +465,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color: getColor(
-                                    controller
-                                        .calendarDayCalculation!
-                                        .segments[index]
-                                        .stcwDayResult,
+                                    segment.stcwDayResult,
                                   ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Icon(
-                                  controller
-                                              .calendarDayCalculation!
-                                              .segments[index]
-                                              .stcwDayResult ==
+                                  segment.stcwDayResult ==
                                           StcwDayResult.actual_sea
                                       ? Icons.directions_boat
-                                      : controller
-                                                .calendarDayCalculation!
-                                                .segments[index]
-                                                .stcwDayResult ==
+                                      : segment.stcwDayResult ==
                                             StcwDayResult.stand_by
                                       ? Icons.anchor
                                       : Icons.help_outline,
-                                  color: getColor(
-                                    controller
-                                        .calendarDayCalculation!
-                                        .segments[index]
-                                        .stcwDayResult,
-                                  ),
+                                  color: getColor(segment.stcwDayResult),
                                   size: 16,
                                 ),
                               ),
@@ -509,7 +487,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      controller.formatDate(segment!.date),
+                                      controller.formatDate(segment.date),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -523,35 +501,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: getColor(
-                                          controller
-                                              .calendarDayCalculation!
-                                              .segments[index]
-                                              .stcwDayResult,
+                                          segment.stcwDayResult,
                                         ).withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          if (controller
-                                                  .calendarDayCalculation
-                                                  ?.segments[index]
-                                                  .confirm ??
-                                              false)
+                                          if (segment.confirm)
                                             Icon(
                                               Icons.circle,
                                               size: 6,
-                                              color:  Colors.green,
+                                              color: Colors.green,
                                             ),
                                           SizedBox(width: 5),
                                           Text(
-                                            "Service :- ${controller.calendarDayCalculation?.segments[index].stcwDayResult.name.toString().replaceAll("_", " ").capitalizeFirst ?? ""}",
+                                            "Service :- ${segment.stcwDayResult.name.toString().replaceAll("_", " ").capitalizeFirst ?? ""}",
                                             style: TextStyle(
                                               color: getColor(
-                                                controller
-                                                    .calendarDayCalculation!
-                                                    .segments[index]
-                                                    .stcwDayResult,
+                                                segment.stcwDayResult,
                                               ),
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
@@ -561,17 +529,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       ),
                                     ),
 
-                                    if (controller
-                                                .calendarDayCalculation
-                                                ?.segments[index]
-                                                .stcwDayResult ==
+                                    if (segment.stcwDayResult ==
                                             StcwDayResult.actual_sea &&
-                                        (controller
-                                                    .calendarDayCalculation
-                                                    ?.segments[index]
-                                                    .confirm ??
-                                                false) ==
-                                            false) ...[
+                                        segment.atSeaDuration.inHours >= 4 &&
+                                        segment.confirm == false) ...[
                                       const SizedBox(height: 5),
                                       Text(
                                         "where you watch this day ? ",
@@ -592,11 +553,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               radius: 4,
                                               text: "Yes",
                                               onPressed: () {
-                                                controller.onTapYes(
-                                                  controller
-                                                      .calendarDayCalculation!
-                                                      .segments[index],
-                                                );
+                                                controller.onTapYes(segment);
                                               },
                                               fontSize: 11,
                                             ),
@@ -608,15 +565,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               text: "No",
                                               isBorderEnable: true,
                                               color: AppColor.transparent,
-                                              textColor:  Colors.green,
-                                              borderColor:  Colors.green,
+                                              textColor: Colors.green,
+                                              borderColor: Colors.green,
                                               fontSize: 11,
                                               onPressed: () {
                                                 controller.editTap(
                                                   context,
-                                                  controller
-                                                      .calendarDayCalculation!
-                                                      .segments[index],
+                                                  segment,
                                                 );
                                               },
                                             ),
