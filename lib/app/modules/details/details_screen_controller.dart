@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
 import 'package:ship_track_flutter/app/models/saved_local_data_model.dart';
+
 import '../../../exports.dart';
 import '../../models/day_segment_model.dart';
 import '../../models/stcw_model.dart';
@@ -44,10 +45,7 @@ class DetailsController extends GetxController with BaseClass {
     final List<dynamic>? storedData = storage.read(LocalKeys.storedAis);
     if (storedData != null) {
       localSavedList = storedData
-          .map(
-            (item) =>
-                LocalSavedDataModel.fromJson(Map<String, dynamic>.from(item)),
-          )
+          .map((item) => LocalSavedDataModel.fromJson(item))
           .toList();
       update();
     }
@@ -163,7 +161,7 @@ class DetailsController extends GetxController with BaseClass {
         if (data.vesselIMO == selectedVessel?["IMO"] &&
             element.date == data.date) {
           element.stcwDayResult = data.status!;
-          element.confirm=data.confirm??false;
+          element.confirm = data.confirm;
         }
       }
 
@@ -262,6 +260,7 @@ class DetailsController extends GetxController with BaseClass {
       },
     );
   }
+
   // on  service Status changes
 
   onChangedService(StcwDayResult selectedValue, DateTime selectedDate) {
@@ -302,6 +301,7 @@ class DetailsController extends GetxController with BaseClass {
     int totalCountableDay = 0;
     int totalUnCountableDay = 0;
     int totalActualSeaDays = 0;
+    int totalWatchKeepingDays = 0;
     int totalStandByDays = 0;
     int totalYardDays = 0;
     int totalUnknownDays = 0;
@@ -313,6 +313,10 @@ class DetailsController extends GetxController with BaseClass {
         totalCountableDay++;
       } else {
         totalUnCountableDay++;
+      }
+
+      if (segment.confirm == true) {
+        totalWatchKeepingDays++;
       }
 
       switch (segment.stcwDayResult) {
@@ -342,11 +346,12 @@ class DetailsController extends GetxController with BaseClass {
       totalUnknownDays: totalUnknownDays,
       totalCountableDay: totalCountableDay,
       totalUnCountableDay: totalUnCountableDay,
+      totalWatchKeepingDays: totalWatchKeepingDays,
     );
   }
 
   ////// conformation  Actual sea Day Service
-  onTapYes(DaySegment daySegment) async {
+  onTapYesNo({required DaySegment daySegment, required bool value}) async {
     final String? imo = selectedVessel?["IMO"];
 
     /// 1️⃣ Update only that segment (NO update() inside loop)
@@ -354,19 +359,18 @@ class DetailsController extends GetxController with BaseClass {
 
     for (var element in segments) {
       if (element.date == daySegment.date) {
-        element.confirm = true;
+        element.confirm = value;
         break;
       }
-      update();
     }
-
+    update();
 
     /// 2️⃣ Update local storage list
     int index = localSavedList.indexWhere(
       (element) => element.vesselIMO == imo && element.date == daySegment.date,
     );
     if (index != -1) {
-      localSavedList[index].confirm = true;
+      localSavedList[index].confirm = value;
     } else {
       localSavedList.add(
         LocalSavedDataModel(
@@ -379,10 +383,9 @@ class DetailsController extends GetxController with BaseClass {
     }
 
     /// 3️⃣ Save storage (this is sync, keep once)
-    storage.write(
-      LocalKeys.storedAis,
-      localSavedList.map((e) => e.toJson()).toList(),
-    );
+    List<dynamic> dt = localSavedList.map((e) => e.toJson()).toList();
+    await storage.write(LocalKeys.storedAis, dt);
+    setCalculateStcwRule();
     update();
   }
 }

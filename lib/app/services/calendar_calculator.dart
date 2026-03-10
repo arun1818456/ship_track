@@ -24,6 +24,7 @@ class CalendarDayCalculator {
         totalUnknownDays: 0,
         totalCountableDay: 0,
         totalUnCountableDay: 0,
+        totalWatchKeepingDays: 0,
       );
     }
 
@@ -105,7 +106,7 @@ class CalendarDayCalculator {
           atSeaDuration: aisClassifierResult.atSeaDuration,
           isCountedDay: false,
           showError: "",
-          confirm: false,
+          confirm: null,
         ),
       );
     }
@@ -121,6 +122,7 @@ class CalendarDayCalculator {
       totalUnknownDays: 0,
       totalCountableDay: 0,
       totalUnCountableDay: 0,
+      totalWatchKeepingDays: 0,
     );
   }
 }

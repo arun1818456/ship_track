@@ -8,7 +8,7 @@ class DaySegment {
    StcwDayResult stcwDayResult;
    Duration atSeaDuration;
    bool isCountedDay;
-   bool confirm;
+   bool? confirm;
    String showError;
 
   DaySegment({

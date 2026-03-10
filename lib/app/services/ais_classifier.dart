@@ -98,8 +98,23 @@ class AISClassifier {
       );
 
       /// ✅ Check ANY entry speed > threshold
-      if (classifications.any((e) => (e.speed ?? 0) > 2.0)) {
-        stcwDayResult = StcwDayResult.actual_sea;
+      // if (classifications.any((e) => (e.speed ?? 0) > 2.0)) {
+      //   stcwDayResult = StcwDayResult.actual_sea;
+      // }
+      //
+      // if (classifications.any((e) => (e.speed ?? 0) < 2.0)) {
+      //   stcwDayResult = StcwDayResult.stand_by;
+      // }
+
+
+
+      for (var element in classifications) {
+        if ((element.speed ?? 0) > 2.0) {
+          stcwDayResult = StcwDayResult.actual_sea;
+          break;
+        } else {
+          stcwDayResult = StcwDayResult.stand_by;
+        }
       }
 
       /// Duration calculation
@@ -210,19 +225,19 @@ class AISClassifier {
         // lastDay = StcwDayResult.yard;
         // print("Yard Day => Always Counted");
       } else if (segment.stcwDayResult == StcwDayResult.unknown) {
-        if (seaCount > unknownCount &&
-            countedDay == true &&
-            seaCount > standbyCount) {
-          unknownCount++;
-          standbyCount++;
-          countedDay = true;
-          // print("Unknown counted within sea balance");
-        } else {
-          unknownCount++;
-          countedDay = false;
-          errorMessage = "";
-          // print("Unknown NOT counted");
-        }
+        unknownCount++;
+        standbyCount++;
+        errorMessage = "";
+        countedDay = false;
+        // if (seaCount > unknownCount && countedDay == true && seaCount > standbyCount) {
+        //
+        //   // print("Unknown counted within sea balance");
+        // } else {
+        //   unknownCount++;
+        //   countedDay = false;
+        //   errorMessage = "";
+        //   // print("Unknown NOT counted");
+        // }
         // lastDay= StcwDayResult.unknown;
       }
 
@@ -265,7 +280,7 @@ class AISClassifier {
       atSeaDuration: daySegment.atSeaDuration,
       isCountedDay: daySegment.isCountedDay,
       showError: daySegment.showError,
-      confirm: false,
+      confirm: daySegment.confirm,
     );
   }
 }

@@ -23,11 +23,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
           appBar: AppBar(
             leading: BackButton(color: AppColor.white),
             elevation: 0,
-            title: Text(
-              'AIS Track Data',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppColor.white,
+            title: GestureDetector(
+              onTap: (){
+                final List<dynamic>? storedData = controller.storage.read(LocalKeys.storedAis);
+                print(">>>>>> Stored data $storedData");
+              },
+              child: Text(
+                'AIS Track Data',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColor.white,
+                ),
               ),
             ),
             centerTitle: true,
@@ -199,6 +205,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   .toString(),
               Icons.directions_boat,
               Colors.blue,
+              context,
+            ),
+            const Divider(),
+            _buildStatRow(
+              'Watchkeeping Days',
+              (controller.calendarDayCalculation?.totalWatchKeepingDays ?? 0)
+                  .toString(),
+              Icons.remove_red_eye,
+              Colors.teal,
               context,
             ),
             const Divider(),
@@ -431,7 +446,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     controller.calendarDayCalculation?.segments.length ?? 0,
                 separatorBuilder: (context, index) => const SizedBox(height: 6),
                 itemBuilder: (context, index) {
-                  DaySegment? segment = controller.calendarDayCalculation?.segments[index];
+                  DaySegment? segment =
+                      controller.calendarDayCalculation?.segments[index];
                   return GestureDetector(
                     onTap: () {
                       Get.toNamed(
@@ -508,7 +524,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          if (segment.confirm)
+                                          if ((segment.confirm ?? false) ==
+                                              true)
                                             Icon(
                                               Icons.circle,
                                               size: 6,
@@ -532,7 +549,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     if (segment.stcwDayResult ==
                                             StcwDayResult.actual_sea &&
                                         segment.atSeaDuration.inHours >= 4 &&
-                                        segment.confirm == false) ...[
+                                        segment.confirm == null) ...[
                                       const SizedBox(height: 5),
                                       Text(
                                         "where you watch this day ? ",
@@ -553,7 +570,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               radius: 4,
                                               text: "Yes",
                                               onPressed: () {
-                                                controller.onTapYes(segment);
+                                                controller.onTapYesNo(
+                                                  daySegment: segment,
+                                                  value: true,
+                                                );
                                               },
                                               fontSize: 11,
                                             ),
@@ -569,9 +589,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               borderColor: Colors.green,
                                               fontSize: 11,
                                               onPressed: () {
-                                                controller.editTap(
-                                                  context,
-                                                  segment,
+                                                controller.onTapYesNo(
+                                                  value: false,
+                                                  daySegment: segment,
                                                 );
                                               },
                                             ),

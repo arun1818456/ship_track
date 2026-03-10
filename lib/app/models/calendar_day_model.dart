@@ -5,6 +5,7 @@ class CalendarDaysResult {
   final int totalAtSeaDays;
   final int totalInPortDays;
   final int totalActualSeaDays;
+  final int totalWatchKeepingDays;
   final int totalStandByDays;
   final int totalYardDays;
   final int totalUnknownDays;
@@ -18,6 +19,7 @@ class CalendarDaysResult {
     required this.totalInPortDays,
     required this.segments,
     required this.totalActualSeaDays,
+    required this.totalWatchKeepingDays,
     required this.totalStandByDays,
     required this.totalYardDays,
     required this.totalUnknownDays,
@@ -32,6 +34,7 @@ class CalendarDaysResult {
       'total_in_port_days': totalInPortDays,
       'segments': segments.map((s) => s.toJson()).toList(),
       'total_actual_sea_days': totalActualSeaDays,
+      'total_watchkeeping_days': totalWatchKeepingDays,
       'total_stand_by_days': totalStandByDays,
       'total_yard_days': totalYardDays,
       'total_unknown_days': totalUnknownDays,
