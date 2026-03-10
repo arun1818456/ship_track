@@ -377,7 +377,7 @@ class DetailsController extends GetxController with BaseClass {
           vesselIMO: imo,
           date: daySegment.date,
           status: daySegment.stcwDayResult,
-          confirm: true,
+          confirm: value,
         ),
       );
     }
