@@ -324,7 +324,9 @@ class DetailsController extends GetxController with BaseClass {
           totalActualSeaDays++;
           break;
         case StcwDayResult.stand_by:
+          if(segment.isCountedDay==true){
           totalStandByDays++;
+          }
           break;
         case StcwDayResult.yard:
           totalYardDays++;

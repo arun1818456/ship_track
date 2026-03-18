@@ -552,7 +552,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         segment.confirm == null) ...[
                                       const SizedBox(height: 5),
                                       Text(
-                                        "where you watch this day ? ",
+                                        "Were you on watch this day?",
                                         style: TextStyle(
                                           color: Colors.green,
                                           fontSize: 12,
