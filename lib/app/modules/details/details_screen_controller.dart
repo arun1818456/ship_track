@@ -244,9 +244,13 @@ class DetailsController extends GetxController with BaseClass {
                     SizedBox(width: 15),
                     Expanded(
                       child: CustomButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Get.back();
                           onChangedService(selectedValue!, selectedDate);
+                          if (selectedValue == StcwDayResult.actual_sea) {
+                          await  actualSeaDayConformation(context, selectedSegment: selectedSegment);
+                          }
+                          setCalculateStcwRule();
                         },
                         text: "Save",
                       ),
@@ -289,10 +293,6 @@ class DetailsController extends GetxController with BaseClass {
       LocalKeys.storedAis,
       localSavedList.map((e) => e.toJson()).toList(),
     );
-
-    // Recalculate STCW totals
-    setCalculateStcwRule();
-
     // Now close the dialog
   }
 
@@ -324,8 +324,8 @@ class DetailsController extends GetxController with BaseClass {
           totalActualSeaDays++;
           break;
         case StcwDayResult.stand_by:
-          if(segment.isCountedDay==true){
-          totalStandByDays++;
+          if (segment.isCountedDay == true) {
+            totalStandByDays++;
           }
           break;
         case StcwDayResult.yard:
@@ -390,4 +390,127 @@ class DetailsController extends GetxController with BaseClass {
     setCalculateStcwRule();
     update();
   }
+
+  /////on selected actual sea day on edit
+
+ actualSeaDayConformation(context ,{required DaySegment selectedSegment}){
+   return showDialog(
+     context: context,
+     barrierDismissible: false,
+     builder: (context) {
+       return Dialog(
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(20),
+         ),
+         child: Padding(
+           padding: const EdgeInsets.symmetric(
+             horizontal: 20,
+             vertical: 25,
+           ),
+           child: Column(
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               // 🔶 Icon
+               Container(
+                 padding: EdgeInsets.all(15),
+                 decoration: BoxDecoration(
+                   color: Colors.orange.withOpacity(
+                     0.1,
+                   ),
+                   shape: BoxShape.circle,
+                 ),
+                 child: Icon(
+                   Icons.watch_later_outlined,
+                   color: Colors.orange,
+                   size: 40,
+                 ),
+               ),
+
+               SizedBox(height: 20),
+
+               // 🔶 Title (CENTER)
+               Text(
+                 "On Watch?",
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   fontSize: 20,
+                   fontWeight: FontWeight.bold,
+                 ),
+               ),
+
+               SizedBox(height: 10),
+
+               // 🔶 Description (CENTER)
+               Text(
+                 "Were you on watch this day?",
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   fontSize: 15,
+                   color: Colors.grey,
+                 ),
+               ),
+
+               SizedBox(height: 25),
+
+               // 🔶 Buttons
+               Row(
+                 children: [
+                   // NO
+                   Expanded(
+                     child: OutlinedButton(
+                       onPressed: () {
+                         Navigator.pop(context);
+                         onTapYesNo(
+                           daySegment: selectedSegment,
+                           value: false,
+                         );
+                         // print("NO clicked");
+                       },
+                       style: OutlinedButton.styleFrom(
+                         shape: RoundedRectangleBorder(
+                           borderRadius:
+                           BorderRadius.circular(
+                             12,
+                           ),
+                         ),
+                       ),
+                       child: Text("No"),
+                     ),
+                   ),
+
+                   SizedBox(width: 10),
+
+                   // YES
+                   Expanded(
+                     child: ElevatedButton(
+                       onPressed: () {
+                         Navigator.pop(context);
+                         onTapYesNo(
+                           daySegment: selectedSegment,
+                           value: true,
+                         );
+                         // print("YES clicked");
+                       },
+                       style: ElevatedButton.styleFrom(
+                         backgroundColor:
+                         Colors.orange,
+                         shape: RoundedRectangleBorder(
+                           borderRadius:
+                           BorderRadius.circular(
+                             12,
+                           ),
+                         ),
+                       ),
+                       child: Text("Yes"),
+                     ),
+                   ),
+                 ],
+               ),
+             ],
+           ),
+         ),
+       );
+     },
+   );
+ }
 }
