@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:ship_track_flutter/app/models/historical_model.dart';
 import 'package:ship_track_flutter/app/models/saved_local_data_model.dart';
 
@@ -162,6 +163,7 @@ class DetailsController extends GetxController with BaseClass {
             element.date == data.date) {
           element.stcwDayResult = data.status!;
           element.confirm = data.confirm;
+          element.editedOn = data.editedOn;
         }
       }
 
@@ -284,6 +286,7 @@ class DetailsController extends GetxController with BaseClass {
           vesselIMO: imo,
           date: selectedDate,
           status: selectedValue,
+          editedOn: DateFormat("dd-MM-yyyy").format(DateTime.now()).toString(),
         ),
       );
     }
@@ -501,7 +504,7 @@ class DetailsController extends GetxController with BaseClass {
                            ),
                          ),
                        ),
-                       child: Text("Yes"),
+                       child: Text("Yes",style: TextStyle(color: AppColor.white),),
                      ),
                    ),
                  ],

@@ -5,12 +5,14 @@ class LocalSavedDataModel {
   DateTime? date;
   StcwDayResult? status;
   bool? confirm;
+  String? editedOn;
 
   LocalSavedDataModel({
     this.vesselIMO,
     this.date,
     this.status,
     this.confirm,
+    this.editedOn = "",
   });
 
   LocalSavedDataModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class LocalSavedDataModel {
         : null;
 
     confirm = json['confirm'];
+    editedOn = json['editedOn']??"";
   }
 
   Map<String, dynamic> toJson() {
@@ -40,6 +43,7 @@ class LocalSavedDataModel {
       'status': status?.name,
 
       'confirm': confirm,
+      'editedOn': editedOn,
     };
   }
 }

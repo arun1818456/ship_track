@@ -545,7 +545,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ],
                                       ),
                                     ),
-
+                                    const SizedBox(height: 3),
+                                    if((segment.editedOn??"").isNotEmpty)
+                                    Text(" Edited on ${segment.editedOn ?? ""}",style: TextStyle(fontSize: 12),),
+                                    const SizedBox(height: 3),
                                     if (segment.stcwDayResult ==
                                             StcwDayResult.actual_sea &&
                                         segment.atSeaDuration.inHours >= 4 &&

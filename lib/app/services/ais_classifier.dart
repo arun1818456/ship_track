@@ -258,6 +258,7 @@ class AISClassifier {
           isCountedDay: countedDay,
           showError: errorMessage,
           confirm: daySegment.confirm,
+          editedOn: daySegment.editedOn,
         );
 
         // print("\n***** FINAL RESULT FOR TARGET DAY *****");
@@ -281,6 +282,7 @@ class AISClassifier {
       isCountedDay: daySegment.isCountedDay,
       showError: daySegment.showError,
       confirm: daySegment.confirm,
+      editedOn: daySegment.editedOn,
     );
   }
 }

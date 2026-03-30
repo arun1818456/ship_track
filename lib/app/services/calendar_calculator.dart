@@ -107,6 +107,7 @@ class CalendarDayCalculator {
           isCountedDay: false,
           showError: "",
           confirm: null,
+          editedOn: "",
         ),
       );
     }

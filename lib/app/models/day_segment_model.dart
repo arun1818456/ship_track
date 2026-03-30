@@ -10,7 +10,7 @@ class DaySegment {
    bool isCountedDay;
    bool? confirm;
    String showError;
-
+   String? editedOn;
   DaySegment({
     required this.date,
     required this.status,
@@ -21,6 +21,7 @@ class DaySegment {
     required this.isCountedDay,
     required this.showError,
     required this.confirm,
+     this.editedOn,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +35,7 @@ class DaySegment {
       'is_counted_day': isCountedDay,
       'show_error': showError,
       'confirm': confirm,
+      'editedOn': editedOn,
     };
   }
 }
